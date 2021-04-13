@@ -123,9 +123,7 @@ else if(bn::keypad::down_held())
 
 I am trying to add the header files that you need too, but the best way to use these examples is probably to look for the tag for today.. [day-3](https://github.com/foopod/gbaGamejam2021/releases/tag/day-3)
 
-Yay! It moves! I mean does it go off the screen? Yes! Can I follow the little cat? No!
-
-Let's figure out how the camera works!
+Yay! It moves!
 
 ### Background
 
@@ -214,4 +212,4 @@ Looking good.
 + Figure out how I can set up collisions
     + Detect bg tiles?
     + Make a map collision layer?
-    
+
