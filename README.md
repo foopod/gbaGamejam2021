@@ -51,3 +51,6 @@ void sprites_visibility_scene(bn::sprite_text_generator& text_generator)
 But really the only thing we need is `bn::sprite_ptr red_sprite = bn::sprite_items::red_sprite.create_sprite(0, 0);`
 
 So lets draw something to the screen...
+
+![](readme-images/day-2.png)
+
