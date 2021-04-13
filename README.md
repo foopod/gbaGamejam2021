@@ -203,4 +203,15 @@ Okay, so now I can move the BG to the right place..
 bn::affine_bg_ptr map_bg = bn::affine_bg_items::map.create_bg(128, -176);
 ```
 
-#Todo change background colour
+Looking good.
+
+![](readme-images/day-3-done.gif)
+
+## Do Tomorrow..
+
++ Add bg colour / sky
++ Flip sprite when going left
++ Figure out how I can set up collisions
+    + Detect bg tiles?
+    + Make a map collision layer?
+    
