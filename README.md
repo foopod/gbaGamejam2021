@@ -54,3 +54,4 @@ So lets draw something to the screen...
 
 ![](readme-images/day-2.png)
 
+Check out the tag "day-2" on this repo to see the code in this state.
