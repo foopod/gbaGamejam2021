@@ -48,6 +48,8 @@ int main()
             cat_sprite.set_x(cat_sprite.x() + 1);
             camera.set_x(camera.x() + 1);
         }
+
+        // Camera doesn't move up and down
         if(bn::keypad::up_held())
         {
             cat_sprite.set_y(cat_sprite.y() - 1);
