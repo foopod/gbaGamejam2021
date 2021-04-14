@@ -1,8 +1,8 @@
 # Readme / Log
 
-## Day -2
+Follow along with me as I attempt to build a platformer thing maybe..
 
-"Oh GBA Gamejam, that could be a lot of fun!" - me
+So yeah, pull up a seat and enjoy the journey.
 
 ## Day 1
 
