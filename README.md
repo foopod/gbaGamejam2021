@@ -64,7 +64,7 @@ Check out the tag [day-2](https://github.com/foopod/gbaGamejam2021/releases/tag/
 
 Today I am tackling animation, not for any specific purpose, but just because I have the assets for them already.
 
-We can use Butano's `create_sprite_animate_action_forever` to make kick off the animation. 
+We can use Butano's `create_sprite_animate_action_forever` to kick off the animation. 
 
 > Also just note that throughout using Butano you will see the use of Actions, they allow you to do transformations to a sprite over time. Read more [here](https://gvaliente.github.io/butano/group__action.html).
 
@@ -138,7 +138,7 @@ Now to add a background image so our cat can explore something...
 bn::affine_bg_ptr map_bg = bn::affine_bg_items::map.create_bg(0, 0);
 ```
 
-Okay, so I don't know if it is working or not. I am guessing most of the image would be off the screen anyway.
+Okay, so I don't know if it is working or not. I am guessing most of the image would be off the screen anyway because it is 512x512 but I only use a very small area of it.
 
 Let's jump straight into the camera so we can move it around and find our background.
 
@@ -176,12 +176,15 @@ Ah! There is my background.
 
 Okay I don't understand this co-ordinate system. Lets try to figure that out.
 
-Luckily logging is pretty simple with Butano..
+Luckily logging is pretty simple with Butano.. `BN_LOG("Hello World!");`
 
 ``` c++
 #include "bn_log.h"
+BN_LOG("sprite-x");
+BN_LOG(cat_sprite.x());
+BN_LOG("sprite-y");
+BN_LOG(cat_sprite.y());
 
-BN_LOG("Hello World!");
 ```
 
 Have I figured out how to concatenate ints and strings in c++ yet? No! So lots of lines of logging it is.
