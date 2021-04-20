@@ -205,11 +205,34 @@ Looking good.
 
 ![](readme-images/day-3-done.gif)
 
+## Days 4-11
+
+Okay. So I may have been scared off a little by C++ again and a little frustrated at my self for not trying harding or digging deeper.
+
+This week hasn't been very good.
+
+But that isn't to say I haven't done anything. The [gbaDev discord](https://discord.io/gbadev) is buzzing with activity and I am enjoying learning little bits and pieces about the GBA, dev tools and other random projects people are working on.
+
+I also watched exelotl's awesome talk on programming for GBA with nim which was super interesting, especially seeing what they are doing with h-blank effects on their project. Link [here](https://www.youtube.com/watch?v=sZUM7MhWr88).
+
+Reading [libtonc](https://www.coranac.com/tonc/text/toc.htm) in my spare time and random things I have found in the [gbadev resources page](https://gbadev.net/).
+
+BUT JONO! DID YOU DO ANY PROGRAMMING?!?!
+
+Well. Yes.
+
+I made the sprite flip when you turn in the other direction. This was super easy in Butano.
+
+``` c++
+// when moving right
+cat_sprite.set_horizontal_flip(false);
+
+// when moving left
+cat_sprite.set_horizontal_flip(true);
+```
+
+See the awful state of the code and this point with the tag [day-11](https://github.com/foopod/gbaGamejam2021/releases/tag/day-3) and ignore the folder labelled wip.
+
 ## Do Tomorrow..
 
-+ Add bg colour / sky
-+ Flip sprite when going left
-+ Figure out how I can set up collisions
-    + Detect bg tiles?
-    + Make a map collision layer?
-
++ Figure out how to access map data on the fly

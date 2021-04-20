@@ -3,13 +3,18 @@
 #include "bn_sprite_builder.h"
 #include "bn_sprite_ptr.h"
 #include "bn_keypad.h"
+#include "bn_regular_bg_ptr.h"
+#include "bn_regular_bg_item.h"
 #include "bn_affine_bg_ptr.h"
 #include "bn_affine_bg_item.h"
+#include "bn_affine_bg_tiles_ptr.h"
 #include "bn_camera_actions.h"
 #include "bn_sprite_animate_actions.h"
 
 #include "bn_sprite_items_cat.h"
 #include "bn_affine_bg_items_map.h"
+#include "bn_affine_bg_items_map1.h"
+#include "bn_regular_bg_items_map2.h"
 
 
 int main()
@@ -20,7 +25,7 @@ int main()
     bn::sprite_animate_action<9> action = bn::create_sprite_animate_action_forever(
                     cat_sprite, 6, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
     
-    bn::affine_bg_ptr map_bg = bn::affine_bg_items::map.create_bg(128, -176);
+    bn::affine_bg_ptr map_bg = bn::affine_bg_items::map1.create_bg(0, -50);
 
     bn::camera_ptr camera = bn::camera_ptr::create(0, 0);
 
@@ -30,21 +35,19 @@ int main()
 
         if(bn::keypad::left_held())
         {
-            BN_LOG("Camx");
-            BN_LOG(camera.x());
-            BN_LOG("Camy");
-            BN_LOG(camera.y());
-            BN_LOG("spritex");
-            BN_LOG(cat_sprite.x());
-            BN_LOG("spritey");
-            BN_LOG(cat_sprite.y());
+            BN_LOG(bn::affine_bg_items::map1.tiles_item().tiles_ref().size());
+            BN_LOG(map_bg.tiles().tiles_count());
+            BN_LOG(map_bg.map().cells_ref()[0]);
 
+
+            cat_sprite.set_horizontal_flip(true);
             cat_sprite.set_x(cat_sprite.x() - 1);
             camera.set_x(camera.x() - 1);
             
         }
         else if(bn::keypad::right_held())
         {
+            cat_sprite.set_horizontal_flip(false);
             cat_sprite.set_x(cat_sprite.x() + 1);
             camera.set_x(camera.x() + 1);
         }
@@ -61,6 +64,7 @@ int main()
         
         cat_sprite.set_camera(camera);
         map_bg.set_camera(camera);
+        //map2_bg.set_camera(camera);
         action.update();
         bn::core::update();
     }
