@@ -234,7 +234,7 @@ cat_sprite.set_horizontal_flip(false);
 cat_sprite.set_horizontal_flip(true);
 ```
 
-See the awful state of the code and this point with the tag [day-11](https://github.com/foopod/gbaGamejam2021/releases/tag/day-3) and ignore the folder labelled wip.
+See the awful state of the code and this point with the tag [day-11](https://github.com/foopod/gbaGamejam2021/releases/tag/day-11) and ignore the folder labelled wip.
 
 ## Do Tomorrow..
 
