@@ -321,3 +321,13 @@ OMG. Almost forgot the most important thing. I learned how to cast integers to s
 ``` c++
 bn::to_string<32>(my_integer);
 ```
+
+And tonight I have homework reading the following about pointers...
+
++ https://www.geeksforgeeks.org/auto_ptr-unique_ptr-shared_ptr-weak_ptr-2/
++ https://docs.microsoft.com/en-us/cpp/cpp/how-to-create-and-use-shared-ptr-instances?view=msvc-160
+
+## Tomorrow..
+
++ Refactor and make a player class
++ Start to work on collisions
