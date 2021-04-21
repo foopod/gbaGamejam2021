@@ -315,3 +315,9 @@ Pretty happy with what I have acheived today. Can rest easy tonight.
 ![](readme-images/day-12.gif)
 
 Oh. Also todays tag -> [day-12](https://github.com/foopod/gbaGamejam2021/releases/tag/day-12)
+
+OMG. Almost forgot the most important thing. I learned how to cast integers to strings.
+
+``` c++
+bn::to_string<32>(my_integer);
+```
