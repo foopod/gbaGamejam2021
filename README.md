@@ -327,7 +327,103 @@ And tonight I have homework reading the following about pointers...
 + https://www.geeksforgeeks.org/auto_ptr-unique_ptr-shared_ptr-weak_ptr-2/
 + https://docs.microsoft.com/en-us/cpp/cpp/how-to-create-and-use-shared-ptr-instances?view=msvc-160
 
+## Day 13
+
+Collisions.
+
+This should be fun.
+
+FYI I first learned collision logic making a similar platformer in pico8. I found these tutorials invaluable for that. And tbh its a great resource that can bbe applied in any programming language even though the examples are lua & pico8.
+
+This should be easy now that we can get map data.
+
+So first off I am making a simple method to apply gravity so that we can move better.
+
+``` c++
+    bn::fixed_point apply_gravity(bn::fixed_point pos)
+    {
+        return bn::fixed_point(pos.x(), pos.y() +1);
+    }
+```
+
+And I call it like this...
+
+``` c++
+cat_sprite.set_position(apply_gravity(cat_sprite.position()));
+```
+
+It takes a position and adds 1 to the y value. Yes positive y is down, I am slowly getting used to it too.
+
+Now we fall :D
+
+![](readme-images/day-12-falling.gif)
+
+Good start. Now to stop us falling when we hit the ground. Note that for now I am not bothering too much about the sprites exact position. You will see what I mean.
+
+The next function we make is one to check for collisions and stop the falling.
+
+``` c++
+    void check_collisions(bn::sprite_ptr& sprite, bn::affine_bg_ptr& map)
+    {
+        // gets the current map cell the sprite is on.
+        bn::fixed current_cell = get_map_index(sprite.x(), sprite.y(), map.dimensions().width());
+
+        // at the moment all I am doing is checking if the cell is not the sky cell (aka not zero)
+        bool is_hit = map.map().cells_ref().value().at(current_cell.integer()) != 0;
+        
+        if(is_hit){
+            // if it is hit then we undo gravity :D
+            sprite.set_y(sprite.y() -1);
+        }
+    }
+```
+
+![](readme-images/day-12-collision.gif)
+
+Things to note... 
+
++ We are checking exactly where the centre of our sprite is, but we can change this to the bottom of our sprite fairly easily.
++ We are just checking that the cell isn't sky, somehow we need to know what tiles we can stand on and what we can't.
+
+Being able to tell different tiles apart is hard though. Their index is determined by the image processor that creates the tiles and the map from our bmp. What I did notice though is that it kind of looks like the following...
+
+```
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 01 02 03 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 04 05 06 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+07 08 08 07 09 10 00 00 00 00 00 00 00 00 00 00 00
+11 11 11 11 11 11 07 08 07 08 07 08 07 08 08 07 09
+11 11 12 11 11 11 11 11 12 11 11 11 11 11 11 12 12
+```
+
+So the tiles position in the tile array is determined by the order it appears in the map.
+
+And since I don't plan on using the top of the map anyway, prehaps I can throw all the floor tiles into the first row. Like this...
+
+
+```
+00 01 02 03 04 05 06 07 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 08 09 10 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 11 12 13 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+01 02 01 03 04 05 00 00 00 00 00 00 00 00 00 00 00
+14 14 14 14 14 14 07 04 07 02 07 01 07 01 02 07 03
+14 14 15 14 14 14 14 14 12 14 14 14 14 14 14 15 14
+```
+
+Now my collision check could can just confirm if the tile is between 0 and 8, if it is then it is ground.
+
+I mean, this should work. At least until it becomes complex enough to have different types of collisions and such.
+
+I will mull on this for a little while haha.
+
+
 ## Tomorrow..
 
 + Refactor and make a player class
-+ Start to work on collisions
++ Improve collisions
