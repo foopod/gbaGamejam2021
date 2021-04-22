@@ -422,6 +422,29 @@ I mean, this should work. At least until it becomes complex enough to have diffe
 
 I will mull on this for a little while haha.
 
+### Interlude
+
+In the meantime I got inspired by someone making chiptunes for their game and decided to do the same.
+
+I downloaded MilkyTracker, which at first was really confusing, but [this youtuber](https://www.youtube.com/channel/UCegheZHIpMbFwxbY4jrc8DA/videos) has tons of awesome tutorials on it.
+
+With a little effort we have some background music playing. 
+
+``` c++
+// music item import for .mod .xm .it and .s3m
+#include "bn_music_items.h"
+
+// to play your song on repeat at 50% volume
+bn::bn_music_items::my_song.play(0.5);
+```
+
+NOTE: You can use sound_items in the same way for .wav files.
+
+Probably a little too cyberpunk for the current game, but it was fun to make anyway.
+
+You can listen to it [here](readme-images/example.wav).
+
+
 
 ## Tomorrow..
 

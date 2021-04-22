@@ -18,6 +18,7 @@
 #include "bn_affine_bg_items_map.h"
 #include "bn_affine_bg_items_map1.h"
 #include "bn_regular_bg_items_map2.h"
+#include "bn_music_items.h"
 
 #include "bn_string_view.h"
 #include "bn_vector.h"
@@ -77,6 +78,7 @@ int main()
     bn::sprite_text_generator text_generator(variable_8x16_sprite_font);
     text_generator.set_center_alignment();
     bn::vector<bn::sprite_ptr, 32> text_sprites;
+    bn::music_items::song.play(0.5);
     
     while(true)
     {
