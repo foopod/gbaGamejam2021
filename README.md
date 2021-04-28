@@ -6,8 +6,8 @@ So yeah, pull up a seat and enjoy the journey.
 
 ## Tomorrow..
 
-+ Refactor and make a player class
-+ Improve collisions
++ Left and right collisions
++ Make it easier to detect ground tiles
 
 ## Day 14-17
 
