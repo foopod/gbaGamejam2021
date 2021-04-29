@@ -2,7 +2,7 @@
 
 Follow along with me as I attempt to build a platformer thing maybe..
 
-So yeah, pull up a seat and enjoy the journey.
+So yeah, pull up a seat and enjoy the journey, if you are new you can start from the bottom or [read on my site](http://jonoshields.com/gamejam/) for better navigation.
 
 ## To-do
 
@@ -10,6 +10,7 @@ So yeah, pull up a seat and enjoy the journey.
 + Spend a whole day on pixel art making tiles for new map areas
 + Think about other mechanics that could be fun
 + How to draw bouncing yarn balls?
++ Maybe limit dash to once every 2 seconds or something, because right now you can basically fly
 
 ## Day 18-20
 
