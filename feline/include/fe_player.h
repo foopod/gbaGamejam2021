@@ -7,6 +7,8 @@
 #include "bn_sprite_animate_actions.h"
 #include "bn_affine_bg_ptr.h"
 
+#include "fe_elevator.h"
+
 namespace fe
 {
     class Player
@@ -35,11 +37,11 @@ namespace fe
             [[nodiscard]] bn::fixed_point pos();
 
             void jump();
-            void collide_with_map(bn::affine_bg_ptr map);
+            void collide_with_objects(bn::affine_bg_ptr map, fe::Elevator elevator);
             void move_right();
             void move_left();
             void apply_animation_state();
-            void update_position(bn::affine_bg_ptr map);
+            void update_position(bn::affine_bg_ptr map, fe::Elevator elevator);
     };
 }
 

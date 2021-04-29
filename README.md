@@ -4,10 +4,121 @@ Follow along with me as I attempt to build a platformer thing maybe..
 
 So yeah, pull up a seat and enjoy the journey.
 
-## Tomorrow..
+## To-do
 
-+ Left and right collisions
-+ Make it easier to detect ground tiles
++ Map Design - Bust out a notebook and draw out a high level map of what the game could look like
++ Spend a whole day on pixel art making tiles for new map areas
++
+
+## Day 18-20
+
+### More refactoring
+
+Okay, so last time we pulled some stuff out into classes. Now after learning some more I have created .h and .cpp files for my new hitbox and player classes.
+
+At this point comparing c++ to other languages I have used before an header file is kind of like an interface or an abstract class. But also at the same time it is absolutely not that. I think.
+
+### Animation States
+
+After fiddling with the collisions a lot to get them feeling as good as I can. I also took the time to add some animation states. So now throughout the "physics steps" - aka sensing button presses, moving the character and detecting collisions, I am also not setting a bunch of flags that I can use for animation states.
+
+The player class now also has...
+
+``` cpp
+bool _jumping;
+bool _falling;
+bool _running;
+bool _grounded;
+bool _sliding;
+```
+
+These are also handy for other things too...
+
+``` cpp
+void Player::jump()
+{
+    if(_grounded){
+        _dy-= jump_power;
+        _grounded = false;
+    }
+}
+```
+
+Like above the player can only jump if they are on the ground, and then the `_grounded` flag is set to false.
+
+``` cpp
+if(_jumping){
+    _action = bn::create_sprite_animate_action_forever(
+                    _sprite, 6, bn::sprite_items::cat.tiles_item(), 9,9,9,9,9,9,9,9,9);
+} else if(_falling){
+    _action = bn::create_sprite_animate_action_forever(
+                    _sprite, 6, bn::sprite_items::cat.tiles_item(), 10,10,10,10,10,10,10,10,10);
+} else if(_sliding){
+    _action = bn::create_sprite_animate_action_forever(
+                    _sprite, 6, bn::sprite_items::cat.tiles_item(), 8,8,8,8,8,8,8,8,8);
+} else if(_running){
+    _action = bn::create_sprite_animate_action_forever(
+            _sprite, 6, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
+} else {
+    //idle
+    _action = bn::create_sprite_animate_action_forever(
+            _sprite, 6, bn::sprite_items::cat.tiles_item(), 0,0,0,0,0,0,0,0,0);
+}
+```
+
+Above is my very basic animation management, it just chooses the animation based on what flags are set.
+
+One problem I noticed after this though is that only the first frame of the run animation is played repeatedly. Turns out that calling this every frame is causing the animation to start again every frame. We will have to add a flag to get around this I think.
+
+![](/readme-images/animation.gif)
+
+Woo! That looks slick. Oh yeah, the cat is now black!
+
+### Dash Ability
+
+This game is based on a pico8 game ([play here](https://jonoshields.com/arcade/cat/)) I made last year. I thought it was cute and look neat, but never really had any idea of where to take it.
+
+I have been building this game out for gba whose screen is huge by comparison (seriously, the game about is 64x64). This made me think about potentially making a Metroidvania style game with these aesthetics. And eventually lead me down the route of what would this cats attack look like?
+
+Ideas..
+
++ Swipes paw at enemy
++ Throws a yarn ball (still might use this)
++ Purrs
++ Sends love hearts
++ Shoots lazers
+
+Okay, so it was in the title. I went with dash, it is simple, easy to implement and feels really good to use.
+
+And I figure I can unlock/add/swap abilities like in metroidvanias to access new areas of the map. So this probably won't be the last ability.
+
+Implementation was easy, I just added a new listener for my new button and added a boost in dx for the direction the character was facing. I also made it do dy if the character is holding up.
+
+``` cpp
+if(bn::keypad::b_pressed())
+{
+    if(bn::keypad::up_held())
+    {
+        _dy = -5;
+    }
+    else if(_sprite.horizontal_flip())
+    {
+        _dx = -5;
+    }
+    else
+    {
+        _dx = 5;
+    }
+} 
+```
+
+After playing around with values I realised that I wouldn't get the full effect until I added an animation for it.
+
+![](/readme-images/dash2.gif)
+
+I will leave you with this now. My failed recording attempt at dashing, accidentally clipping through something and then trying to reproduce.
+
+![](/readme-images/dash.gif)
 
 ## Day 14-17
 

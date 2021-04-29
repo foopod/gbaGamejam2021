@@ -9,11 +9,13 @@
 #include "bn_size.h"
 #include "bn_optional.h"
 #include "bn_span.h"
+#include "bn_log.h"
 
 #include "bn_sprite_items_cat.h"
 
 #include "fe_hitbox.h"
 #include "fe_player.h"
+#include "fe_elevator.h"
 
 namespace fe
 {
@@ -29,7 +31,7 @@ namespace fe
         return map.map().cells_ref().value().at(cell);
     }
 
-    bool check_collisions(bn::fixed_point pos, fe::Hitbox hitbox, bn::affine_bg_ptr& map)
+    bool check_collisions_map(bn::fixed_point pos, fe::Hitbox hitbox, bn::affine_bg_ptr& map)
     {
         int l = pos.x().integer() - hitbox.width() / 2 + hitbox.x();
         int r = pos.x().integer() + hitbox.width() / 2 + hitbox.x();
@@ -46,13 +48,43 @@ namespace fe
         }
     }
 
+    bool check_collisions_elevator(bn::fixed_point pos, fe::Hitbox hitbox, fe::Elevator elevator, bool is_top)
+    {
+        int l = pos.x().integer() - hitbox.width() / 2 + hitbox.x();
+        int r = pos.x().integer() + hitbox.width() / 2 + hitbox.x();
+        int u = pos.y().integer() - hitbox.height() / 2 + hitbox.y() + 2;
+        int d = pos.y().integer() + hitbox.height() / 2 + hitbox.y();
+        
+        // align left and right     
+        if((r > (elevator.pos().x().integer() -16)  && r < (elevator.pos().x().integer()+16))
+            || (l < (elevator.pos().x().integer()+16) && l > (elevator.pos().x().integer() -16)))
+        { 
+            if(is_top) //collide top of balloon
+            {
+                if((u > elevator.top_y() && u < elevator.top_y() + 8)
+                    || (d > elevator.top_y() && d < elevator.top_y() + 8))
+                {
+                    return true;
+                }
+            } else {//collide bottom of balloon
+                if((u > elevator.bottom_y() && u < elevator.bottom_y() + 8)
+                    || (d > elevator.bottom_y() && d < elevator.bottom_y() + 8)) // collide bottom
+                {
+                    return true;
+                }
+            }
+            
+        }
+        return false;
+
+    }
+
     //constants
     constexpr const bn::fixed gravity = 0.3;
     constexpr const bn::fixed jump_power = 3.5;
-    constexpr const bn::fixed acc = 0.2;
-    constexpr const bn::fixed max_dx = 3;
+    constexpr const bn::fixed acc = 0.3;
     constexpr const bn::fixed max_dy = 3;
-    constexpr const bn::fixed friction = 0.9;
+    constexpr const bn::fixed friction = 0.85;
 
     Player::Player(bn::fixed_point pos, bn::sprite_ptr sprite, bn::camera_ptr camera) :
         _pos(pos), _sprite(sprite), _camera(camera), _hitbox_fall(0,4,4,0), _hitbox_left(-2,0,2,4), _hitbox_right(2,0,2,4)
@@ -69,10 +101,9 @@ namespace fe
             _dy-= jump_power;
             _grounded = false;
         }
-        //todo fix phantom jumps
     }
 
-    void Player::collide_with_map(bn::affine_bg_ptr map){
+    void Player::collide_with_objects(bn::affine_bg_ptr map, fe::Elevator elevator){
         // if falling
         if(_dy > 0){
             _falling = true;
@@ -84,35 +115,45 @@ namespace fe
                 _dy = max_dy;
             }
 
-            // if collide while falling then we are on ground
-            if(check_collisions(_pos, _hitbox_fall, map))
+            if(check_collisions_elevator(_pos, _hitbox_fall, elevator, true))
+            {
+                _grounded = true;
+                _falling = false;
+                _dy = 0;
+                _pos.set_y(elevator.top_y() -4);
+            }
+            else if(check_collisions_elevator(_pos, _hitbox_fall, elevator, false))
+            {
+                _grounded = true;
+                _falling = false;
+                _dy = 0;
+                _pos.set_y(elevator.bottom_y() - 4);
+            }
+            else if(check_collisions_map(_pos, _hitbox_fall, map))
             {
                 _grounded = true;
                 _falling = false;
                 _dy = 0;
                 _pos.set_y(_pos.y() - modulo(_pos.y() + 4,8));
-                if(check_collisions(_pos, fe::Hitbox(0,2,2,1), map)){
+                if(check_collisions_map(_pos, fe::Hitbox(0,2,2,1), map)){
                     _pos.set_y(_pos.y() - 8);
                 }
                 //todo if they pressed jump a few milliseconds before hitting the ground then jump now
-            } else {
+            }
+            else
+            {
                 //falling
             }
         } 
         else if(_dy < 0) // jumping
         {
             _jumping = true;
-            //todo collide upward
+            //todo collide upward maybe
         }
 
         if(_dx > 0) // moving right
         {
-            // clamp max speed
-            if(_dx > max_dx){
-                _dx = max_dx;
-            }
-
-            if(check_collisions(_pos, _hitbox_right, map)){
+            if(check_collisions_map(_pos, _hitbox_right, map)){
                 if(_grounded){
                     _dx = 0;
                 }  
@@ -120,12 +161,7 @@ namespace fe
         } 
         else if (_dx < 0) // moving left
         {
-            // clamp max speed
-            if(_dx < -max_dx){
-                _dx = -max_dx;
-            }
-
-            if(check_collisions(_pos, _hitbox_left, map)){
+            if(check_collisions_map(_pos, _hitbox_left, map)){
                 if(_grounded){
                     _dx = 0;
                 }
@@ -170,11 +206,23 @@ namespace fe
                     _sprite, 6, bn::sprite_items::cat.tiles_item(), 0,0,0,0,0,0,0,0,0);
             _already_running = false;
         }
+
+        // dashing
+        if(_dy < -3.5)
+        {   
+            _action = bn::create_sprite_animate_action_forever(
+                    _sprite, 6, bn::sprite_items::cat.tiles_item(), 12,12,12,12,12,12,12,12,12);    
+        }
+        else if(bn::abs(_dx) > 2)
+        {
+            _action = bn::create_sprite_animate_action_forever(
+                    _sprite, 6, bn::sprite_items::cat.tiles_item(), 11,11,11,11,11,11,11,11,11);
+        }
         
         _action.update();
     }
 
-    void Player::update_position(bn::affine_bg_ptr map){
+    void Player::update_position(bn::affine_bg_ptr map, fe::Elevator elevator){
         // apply friction
         _dx = _dx * friction;
 
@@ -190,13 +238,19 @@ namespace fe
         {
             move_right();
         }
-        else if(_running)
+        else if(_running) //slide to a stop
         {
             if(!_falling & !_jumping){
                 _sliding = true;
                 _running = false;
             }
-        }
+        } 
+        else if (_sliding) //stop sliding
+        {
+            if (bn::abs(_dx) < 0.1 || _running){
+                _sliding = false;
+            }
+        } 
 
         // jump
         if(bn::keypad::a_pressed())
@@ -204,31 +258,44 @@ namespace fe
             jump();
         } 
 
-        // fall (and eventually check falling colliders)
-        collide_with_map(map);
-
-        // stop sliding
-        if (_sliding){
-            if (bn::abs(_dx) < 0.1 || _running){
-                _sliding = false;
+        // dash
+        if(bn::keypad::b_pressed())
+        {
+            if(bn::keypad::up_held())
+            {
+                _dy = -5;
+            }
+            else if(_sprite.horizontal_flip())
+            {
+                _dx = -4;
+                _dy = -0.5;
+            }
+            else
+            {
+                _dx = 4;
+                _dy = -0.5;
             }
         } 
+
+        // collide
+        collide_with_objects(map, elevator);
         
         // update position
         _pos.set_x(_pos.x() + _dx);
         _pos.set_y(_pos.y() + _dy);
 
+        // lock player position to map limits x
         if(_pos.x() > 508){
             _pos.set_x(508);
         } else if(_pos.x() < 4){
             _pos.set_x(4);
         }
 
-        // update sprite
+        // update sprite position
         _sprite.set_x(_pos.x());
         _sprite.set_y(_pos.y());
 
-        // update camera
+        // update camera x
         if(_pos.x() < 120)
         {
             _camera.set_x(120);
@@ -239,5 +306,13 @@ namespace fe
         {
             _camera.set_x(_pos.x());
         }
+
+        // update camera y
+        if(_pos.y() < 432){
+            _camera.set_y(_pos.y());
+        } else {
+            _camera.set_y(432);
+        }
+        
     }
 }
