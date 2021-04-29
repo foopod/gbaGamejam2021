@@ -11,6 +11,7 @@ So yeah, pull up a seat and enjoy the journey, if you are new you can start from
 + Think about other mechanics that could be fun
 + How to draw bouncing yarn balls?
 + Maybe limit dash to once every 2 seconds or something, because right now you can basically fly
++ Add .gba builds to each tag/release so we have a playable demo at the end of each day lol
 
 ## Day 18-20
 
