@@ -8,7 +8,8 @@ So yeah, pull up a seat and enjoy the journey.
 
 + Map Design - Bust out a notebook and draw out a high level map of what the game could look like
 + Spend a whole day on pixel art making tiles for new map areas
-+
++ Think about other mechanics that could be fun
++ How to draw bouncing yarn balls?
 
 ## Day 18-20
 
@@ -119,6 +120,9 @@ After playing around with values I realised that I wouldn't get the full effect 
 I will leave you with this now. My failed recording attempt at dashing, accidentally clipping through something and then trying to reproduce.
 
 ![](/readme-images/dash.gif)
+
+[tag for day-20](https://github.com/foopod/gbaGamejam2021/releases/tag/day-20)
+
 
 ## Day 14-17
 
