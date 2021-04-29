@@ -1,4 +1,4 @@
-# Readme / Log
+# Devlog
 
 Follow along with me as I attempt to build a platformer thing maybe..
 
