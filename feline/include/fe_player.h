@@ -7,7 +7,7 @@
 #include "bn_sprite_animate_actions.h"
 #include "bn_affine_bg_ptr.h"
 
-#include "fe_elevator.h"
+#include "fe_level.h"
 
 namespace fe
 {
@@ -28,6 +28,7 @@ namespace fe
             fe::Hitbox _hitbox_fall;
             fe::Hitbox _hitbox_left;
             fe::Hitbox _hitbox_right;
+            fe::Hitbox _hitbox_jump;
             bn::sprite_animate_action<9> _action = bn::create_sprite_animate_action_forever(
                         _sprite, 6, bn::sprite_items::cat.tiles_item(), 0,0,0,0,0,0,0,0,0);
 
@@ -37,11 +38,11 @@ namespace fe
             [[nodiscard]] bn::fixed_point pos();
 
             void jump();
-            void collide_with_objects(bn::affine_bg_ptr map, fe::Elevator elevator);
+            void collide_with_objects(bn::affine_bg_ptr map, fe::Level level);
             void move_right();
             void move_left();
             void apply_animation_state();
-            void update_position(bn::affine_bg_ptr map, fe::Elevator elevator);
+            void update_position(bn::affine_bg_ptr map, fe::Level level);
     };
 }
 
