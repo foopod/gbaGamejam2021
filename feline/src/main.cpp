@@ -11,6 +11,7 @@
 #include "bn_affine_bg_item.h"
 #include "bn_affine_bg_tiles_ptr.h"
 #include "bn_affine_bg_map_ptr.h"
+#include "bn_regular_bg_ptr.h"
 #include "bn_camera_actions.h"
 #include "bn_sprite_animate_actions.h"
 
@@ -18,6 +19,8 @@
 #include "bn_sprite_items_blimp_top.h"
 #include "bn_sprite_items_blimp_bottom.h"
 #include "bn_affine_bg_items_map2.h"
+#include "bn_regular_bg_items_dungeon_bg.h"
+#include "bn_regular_bg_items_vines.h"
 #include "bn_music_items.h"
 
 #include "bn_string_view.h"
@@ -41,6 +44,7 @@ int main()
 
     // player sprite
     bn::sprite_ptr cat_sprite = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y());
+    cat_sprite.set_bg_priority(1);
     bn::camera_ptr camera = bn::camera_ptr::create(init_pos.x(), init_pos.y());
 
     // elevator sprite
@@ -51,13 +55,20 @@ int main()
     // fe::Elevator elevator = fe::Elevator(bn::fixed_point(480,544), top_elevator_sprite, bottom_elevator_sprite, 600);
 
     // map
-    bn::affine_bg_ptr map_bg = bn::affine_bg_items::map2.create_bg(512, 512);
-    fe::Level level = fe::Level(map_bg);
-    map_bg.set_horizontal_scale(2);
-    map_bg.set_vertical_scale(2);
+    bn::regular_bg_ptr map_bg = bn::regular_bg_items::dungeon_bg.create_bg(512, 512);
+    bn::affine_bg_ptr map = bn::affine_bg_items::map2.create_bg(512, 512);
+    bn::regular_bg_ptr vines = bn::regular_bg_items::vines.create_bg(512, 512);
+    map_bg.set_priority(2);
+    map.set_priority(1);
+    vines.set_priority(0);
+    fe::Level level = fe::Level(map);
+    map.set_horizontal_scale(2);
+    map.set_vertical_scale(2);
 
     cat_sprite.set_camera(camera);
+    map.set_camera(camera);
     map_bg.set_camera(camera);
+    vines.set_camera(camera);
 
     // player
     fe::Player player = fe::Player(init_pos, cat_sprite, camera);
@@ -71,8 +82,9 @@ int main()
     {
 
         //elevator.update_position();
-        player.update_position(map_bg,level);
+        player.update_position(map,level);
         player.apply_animation_state();
+        vines.set_position(bn::fixed_point((512-player.pos().x())/10,(512-player.pos().y())/10));
         // text_sprites.clear();
         // text_generator.generate(0, -40, bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()) , text_sprites);
         
