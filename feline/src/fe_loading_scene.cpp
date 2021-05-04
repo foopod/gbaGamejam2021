@@ -1,0 +1,89 @@
+#include "fe_loading_scene.h"
+
+//butano
+#include "bn_core.h"
+#include "bn_log.h"
+#include "bn_keypad.h"
+#include "bn_string.h"
+#include "bn_fixed_point.h"
+#include "bn_sprite_ptr.h"
+#include "bn_camera_ptr.h"
+#include "bn_regular_bg_ptr.h"
+#include "bn_affine_bg_ptr.h"
+#include "bn_sprite_animate_actions.h"
+#include "bn_random.h"
+
+//fe code
+#include "fe_level.h"
+#include "fe_player.h"
+#include "fe_scene.h"
+#include "fe_loading_scene.h"
+
+//assets
+#include "bn_sprite_items_cat.h"
+#include "bn_affine_bg_items_loading_bg.h"
+
+namespace fe
+{
+    void Loading::execute()
+    {
+        bn::fixed_point init_pos = bn::fixed_point(0, 0);
+
+        // player sprite
+        bn::sprite_ptr cat_sprite1 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y()-50);
+        cat_sprite1.set_horizontal_scale(2);
+        cat_sprite1.set_vertical_scale(2);
+        bn::sprite_ptr cat_sprite2 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y()-25);
+        cat_sprite2.set_horizontal_scale(2);
+        cat_sprite2.set_vertical_scale(2);
+        bn::sprite_ptr cat_sprite3 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y()+25);
+        cat_sprite3.set_horizontal_scale(2);
+        cat_sprite3.set_vertical_scale(2);
+        bn::sprite_ptr cat_sprite4 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y()+50);
+        cat_sprite4.set_horizontal_scale(2);
+        cat_sprite4.set_vertical_scale(2);
+        bn::sprite_ptr cat_sprite5 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y());
+        cat_sprite5.set_horizontal_scale(2);
+        cat_sprite5.set_vertical_scale(2);
+        
+        bn::sprite_animate_action<9> action1 = bn::create_sprite_animate_action_forever(
+                        cat_sprite1, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        bn::sprite_animate_action<9> action2 = bn::create_sprite_animate_action_forever(
+                        cat_sprite2, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        bn::sprite_animate_action<9> action3 = bn::create_sprite_animate_action_forever(
+                        cat_sprite3, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        bn::sprite_animate_action<9> action4 = bn::create_sprite_animate_action_forever(
+                        cat_sprite4, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        bn::sprite_animate_action<9> action5 = bn::create_sprite_animate_action_forever(
+                        cat_sprite5, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+        bn::camera_ptr camera = bn::camera_ptr::create(init_pos.x()+100, init_pos.y());
+
+        // map
+        bn::affine_bg_ptr map = bn::affine_bg_items::loading_bg.create_bg(512, 512);
+
+        // camera
+        cat_sprite1.set_camera(camera);
+        cat_sprite2.set_camera(camera);
+        cat_sprite3.set_camera(camera);
+        cat_sprite4.set_camera(camera);
+        cat_sprite5.set_camera(camera);
+        map.set_camera(camera);
+
+        for(int i = 0; i < 120; ++i)
+        {
+            cat_sprite1.set_x(cat_sprite1.x() + 1.3);
+            cat_sprite2.set_x(cat_sprite2.x() + 2);
+            cat_sprite3.set_x(cat_sprite3.x() + 1.5);
+            cat_sprite4.set_x(cat_sprite4.x() + 2.2);
+            cat_sprite5.set_x(cat_sprite5.x() + 1.7);
+
+            action1.update();
+            action2.update();
+            action3.update();
+            action4.update();
+            action5.update();
+            bn::core::update();
+        }
+    }
+}

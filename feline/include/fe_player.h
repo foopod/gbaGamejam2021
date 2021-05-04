@@ -8,6 +8,9 @@
 #include "bn_affine_bg_ptr.h"
 
 #include "fe_level.h"
+#include "fe_hitbox.h"
+
+#include "bn_sprite_items_cat.h"
 
 namespace fe
 {

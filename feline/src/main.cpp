@@ -33,61 +33,32 @@
 #include "fe_player.h"
 #include "fe_elevator.h"
 #include "fe_level.h"
-
-     
+#include "fe_dungeon_scene.h"
+#include "fe_sky_scene.h"
+#include "fe_loading_scene.h"
+#include "fe_scene.h"
 
 int main()
 {
     bn::core::init();
+    fe::Scene scene = fe::Scene::SKY;
+    fe::Loading loading = fe::Loading();
 
-    bn::fixed_point init_pos = bn::fixed_point(115, 940);
-
-    // player sprite
-    bn::sprite_ptr cat_sprite = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y());
-    cat_sprite.set_bg_priority(1);
-    bn::camera_ptr camera = bn::camera_ptr::create(init_pos.x(), init_pos.y());
-
-    // elevator sprite
-    // bn::sprite_ptr top_elevator_sprite = bn::sprite_items::blimp_top.create_sprite(0, 0);
-    // bn::sprite_ptr bottom_elevator_sprite = bn::sprite_items::blimp_bottom.create_sprite(0, 0);
-    // top_elevator_sprite.set_camera(camera);
-    // bottom_elevator_sprite.set_camera(camera);
-    // fe::Elevator elevator = fe::Elevator(bn::fixed_point(480,544), top_elevator_sprite, bottom_elevator_sprite, 600);
-
-    // map
-    bn::regular_bg_ptr map_bg = bn::regular_bg_items::dungeon_bg.create_bg(512, 512);
-    bn::affine_bg_ptr map = bn::affine_bg_items::map2.create_bg(512, 512);
-    bn::regular_bg_ptr vines = bn::regular_bg_items::vines.create_bg(512, 512);
-    map_bg.set_priority(2);
-    map.set_priority(1);
-    vines.set_priority(0);
-    fe::Level level = fe::Level(map);
-    map.set_horizontal_scale(2);
-    map.set_vertical_scale(2);
-
-    cat_sprite.set_camera(camera);
-    map.set_camera(camera);
-    map_bg.set_camera(camera);
-    vines.set_camera(camera);
-
-    // player
-    fe::Player player = fe::Player(init_pos, cat_sprite, camera);
-
-    // text set up
-    bn::sprite_text_generator text_generator(variable_8x16_sprite_font);
-    bn::vector<bn::sprite_ptr, 32> text_sprites;
-    bn::music_items::song.play(0.3);
-    
     while(true)
     {
+        if(scene == fe::Scene::SKY){
+            fe::Sky sky = fe::Sky();
+            scene = sky.execute();
+        } 
+        else if(scene == fe::Scene::DUNGEON)
+        {
+            fe::Dungeon dungeon = fe::Dungeon();
+            scene = dungeon.execute();
+        }
 
-        //elevator.update_position();
-        player.update_position(map,level);
-        player.apply_animation_state();
-        vines.set_position(bn::fixed_point((512-player.pos().x())/10,(512-player.pos().y())/10));
-        // text_sprites.clear();
-        // text_generator.generate(0, -40, bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()) , text_sprites);
-        
+        loading.execute();
         bn::core::update();
+        
     }
+    
 }
