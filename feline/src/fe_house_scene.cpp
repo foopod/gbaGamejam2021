@@ -1,10 +1,10 @@
-#include "fe_dungeon_scene.h"
+#include "fe_house_scene.h"
 
 //butano
 #include "bn_core.h"
 #include "bn_log.h"
-#include "bn_string.h"
 #include "bn_keypad.h"
+#include "bn_string.h"
 #include "bn_fixed_point.h"
 #include "bn_sprite_ptr.h"
 #include "bn_camera_ptr.h"
@@ -20,13 +20,13 @@
 
 //assets
 #include "bn_sprite_items_cat.h"
-#include "bn_affine_bg_items_dungeon.h"
-#include "bn_regular_bg_items_dungeon_bg.h"
-#include "bn_regular_bg_items_vines.h"
+#include "bn_affine_bg_items_house.h"
+#include "bn_regular_bg_items_house_bg.h"
+
 
 namespace fe
 {
-    Scene Dungeon::execute(bn::fixed_point spawn)
+    Scene House::execute(bn::fixed_point spawn)
     {
 
         // player sprite
@@ -35,15 +35,13 @@ namespace fe
         bn::camera_ptr camera = bn::camera_ptr::create(spawn.x(), spawn.y());
 
         //NPC
-        NPC golem = NPC(bn::fixed_point(540, 960), camera, NPC_TYPE::GOLEM);
+        NPC tortoise = NPC(bn::fixed_point(535, 304), camera, NPC_TYPE::TORTOISE);
 
         // map
-        bn::regular_bg_ptr map_bg = bn::regular_bg_items::dungeon_bg.create_bg(512, 512);
-        bn::affine_bg_ptr map = bn::affine_bg_items::dungeon.create_bg(512, 512);
-        bn::regular_bg_ptr vines = bn::regular_bg_items::vines.create_bg(512, 512);
+        bn::regular_bg_ptr map_bg = bn::regular_bg_items::house_bg.create_bg(512, 512);
+        bn::affine_bg_ptr map = bn::affine_bg_items::house.create_bg(512, 512);
         map_bg.set_priority(2);
         map.set_priority(1);
-        vines.set_priority(0);
         fe::Level level = fe::Level(map);
         map.set_horizontal_scale(2);
         map.set_vertical_scale(2);
@@ -52,44 +50,37 @@ namespace fe
         cat_sprite.set_camera(camera);
         map.set_camera(camera);
         map_bg.set_camera(camera);
-        vines.set_camera(camera);
 
         // player
         fe::Player player = fe::Player(spawn, cat_sprite, camera);
-
         while(true)
         {
-            if(golem.near_player(player.pos()))
+            if(tortoise.near_player(player.pos()))
             {
                 if(bn::keypad::a_pressed()){
                     player.set_listening(true);
-                    golem.talk();
-                }else if(!golem.is_talking()){
+                    tortoise.talk();
+                }else if(!tortoise.is_talking()){
                     player.set_listening(false);
                 }
             }
-            golem.update();
+            tortoise.update();
 
+            //elevator.update_position();
             player.update_position(map,level);
             player.apply_animation_state();
-            vines.set_position(bn::fixed_point((512-player.pos().x())/10,(512-player.pos().y())/10));
-            //BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
-
-            //door && npc check
+            // BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
+            
             if(bn::keypad::up_pressed())
             {
-                if(player.pos().x() < 120 && player.pos().x() > 100){
-                    if(player.pos().y() < 960 && player.pos().y() > 920){
-                        return Scene::DUNGEON_SKY;
+                if(player.pos().x() < 720 && player.pos().x() > 700){
+                    if(player.pos().y() < 320 && player.pos().y() > 280){
+                        return Scene::HOUSE_SKY;
                     }
                 }
-
             }
-
             
-
             
-
             bn::core::update();
         }
     }

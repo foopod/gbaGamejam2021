@@ -14,8 +14,6 @@
 #include "bn_random.h"
 
 //fe code
-#include "fe_level.h"
-#include "fe_player.h"
 #include "fe_scene.h"
 #include "fe_loading_scene.h"
 
@@ -46,21 +44,22 @@ namespace fe
         cat_sprite5.set_horizontal_scale(2);
         cat_sprite5.set_vertical_scale(2);
         
-        bn::sprite_animate_action<9> action1 = bn::create_sprite_animate_action_forever(
-                        cat_sprite1, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        bn::sprite_animate_action<9> action2 = bn::create_sprite_animate_action_forever(
-                        cat_sprite2, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        bn::sprite_animate_action<9> action3 = bn::create_sprite_animate_action_forever(
-                        cat_sprite3, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        bn::sprite_animate_action<9> action4 = bn::create_sprite_animate_action_forever(
-                        cat_sprite4, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        bn::sprite_animate_action<9> action5 = bn::create_sprite_animate_action_forever(
-                        cat_sprite5, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        bn::sprite_animate_action<8> action1 = bn::create_sprite_animate_action_forever(
+                        cat_sprite1, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
+        bn::sprite_animate_action<8> action2 = bn::create_sprite_animate_action_forever(
+                        cat_sprite2, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
+        bn::sprite_animate_action<8> action3 = bn::create_sprite_animate_action_forever(
+                        cat_sprite3, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
+        bn::sprite_animate_action<8> action4 = bn::create_sprite_animate_action_forever(
+                        cat_sprite4, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
+        bn::sprite_animate_action<8> action5 = bn::create_sprite_animate_action_forever(
+                        cat_sprite5, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
 
         bn::camera_ptr camera = bn::camera_ptr::create(init_pos.x()+100, init_pos.y());
 
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::loading_bg.create_bg(512, 512);
+        // map.set_horizontal_scale(2);
 
         // camera
         cat_sprite1.set_camera(camera);

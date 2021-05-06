@@ -12,6 +12,7 @@
 #include "bn_log.h"
 
 #include "bn_sprite_items_cat.h"
+#include "bn_sprite_items_text_bg.h"
 
 #include "fe_hitbox.h"
 #include "fe_player.h"
@@ -111,10 +112,21 @@ namespace fe
     constexpr const bn::fixed friction = 0.85;
 
     Player::Player(bn::fixed_point pos, bn::sprite_ptr sprite, bn::camera_ptr camera) :
-        _pos(pos), _sprite(sprite), _camera(camera), _hitbox_fall(0,4,4,0), _hitbox_left(-2,0,2,4), _hitbox_right(2,0,2,4), _hitbox_jump(0,2,4,2)
+        _pos(pos), _sprite(sprite), _camera(camera), _hitbox_fall(0,4,4,0), _hitbox_left(-2,0,2,4), _hitbox_right(2,0,2,4), _hitbox_jump(0,2,4,2),
+        _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),_text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0))
     {
         _sprite.set_horizontal_scale(2);
         _sprite.set_vertical_scale(2);
+        _sprite.put_above();
+
+        _text_bg1.set_scale(2);
+        _text_bg1.set_bg_priority(0);
+        _text_bg1.put_above();
+        _text_bg1.set_camera(_camera);
+        _text_bg2.set_scale(2);
+        _text_bg2.set_bg_priority(0);
+        _text_bg2.put_above();
+        _text_bg2.set_camera(_camera);
     }
 
     bn::fixed_point Player::pos()
@@ -122,9 +134,18 @@ namespace fe
         return _pos;
     }
 
+    void Player::set_listening(bool is_listening)
+    {
+        _listening = is_listening;
+        _text_bg1.set_visible(_listening);
+        _text_bg2.set_visible(_listening);
+        _text_bg1.set_position(_camera.x()+64+8, _camera.y() + 40+24);
+        _text_bg2.set_position(_camera.x()-64+8, _camera.y() + 40+24);
+    }
+
     void Player::jump()
     {
-        if(_grounded){
+        if(_grounded && !_listening){
             _dy-= jump_power;
             _grounded = false;
         }
@@ -226,16 +247,16 @@ namespace fe
         }
 
         // dashing
-        if(_dy < -8)
-        {   
-            _action = bn::create_sprite_animate_action_forever(
-                    _sprite, 6, bn::sprite_items::cat.tiles_item(), 12,12,12,12,12,12,12,12,12);    
-        }
-        else if(bn::abs(_dx) > 3)
-        {
-            _action = bn::create_sprite_animate_action_forever(
-                    _sprite, 6, bn::sprite_items::cat.tiles_item(), 11,11,11,11,11,11,11,11,11);
-        }
+        // if(_dy < -8)
+        // {   
+        //     _action = bn::create_sprite_animate_action_forever(
+        //             _sprite, 6, bn::sprite_items::cat.tiles_item(), 12,12,12,12,12,12,12,12,12);    
+        // }
+        // else if(bn::abs(_dx) > 3)
+        // {
+        //     _action = bn::create_sprite_animate_action_forever(
+        //             _sprite, 6, bn::sprite_items::cat.tiles_item(), 11,11,11,11,11,11,11,11,11);
+        // }
         //BN_LOG("running: " + bn::to_string<32>(_running));
         
         _action.update();
@@ -249,11 +270,11 @@ namespace fe
         _dy+= gravity;
 
         // take input
-        if(bn::keypad::left_held())
+        if(bn::keypad::left_held() && !_listening)
         {
             move_left();
         } 
-        else if(bn::keypad::right_held())
+        else if(bn::keypad::right_held() && !_listening)
         {
             move_right();
         }
@@ -278,23 +299,23 @@ namespace fe
         } 
 
         // dash
-        if(bn::keypad::b_pressed())
-        {
-            if(bn::keypad::up_held())
-            {
-                _dy = -9;
-            }
-            else if(_sprite.horizontal_flip())
-            {
-                _dx = -15;
-                _dy = -1;
-            }
-            else
-            {
-                _dx = 15;
-                _dy = -1;
-            }
-        } 
+        // if(bn::keypad::b_pressed())
+        // {
+        //     if(bn::keypad::up_held())
+        //     {
+        //         _dy = -9;
+        //     }
+        //     else if(_sprite.horizontal_flip())
+        //     {
+        //         _dx = -15;
+        //         _dy = -1;
+        //     }
+        //     else
+        //     {
+        //         _dx = 15;
+        //         _dy = -1;
+        //     }
+        // } 
 
         // collide
         collide_with_objects(map, level);

@@ -27,33 +27,40 @@
 #include "bn_vector.h"
 #include "bn_log.h"
 #include "bn_sprite_text_generator.h"
-#include "variable_8x16_sprite_font.h"
 
 #include "fe_hitbox.h"
-#include "fe_player.h"
-#include "fe_elevator.h"
-#include "fe_level.h"
 #include "fe_dungeon_scene.h"
 #include "fe_sky_scene.h"
+#include "fe_house_scene.h"
 #include "fe_loading_scene.h"
 #include "fe_scene.h"
 
 int main()
 {
     bn::core::init();
-    fe::Scene scene = fe::Scene::SKY;
+    fe::Scene scene = fe::Scene::SKY_HOUSE;
     fe::Loading loading = fe::Loading();
 
     while(true)
     {
-        if(scene == fe::Scene::SKY){
+        if(scene == fe::Scene::HOUSE_SKY){
             fe::Sky sky = fe::Sky();
-            scene = sky.execute();
+            scene = sky.execute(bn::fixed_point(650, 648));
         } 
-        else if(scene == fe::Scene::DUNGEON)
+        else if(scene == fe::Scene::SKY_DUNGEON)
         {
             fe::Dungeon dungeon = fe::Dungeon();
-            scene = dungeon.execute();
+            scene = dungeon.execute(bn::fixed_point(112, 952));
+        } 
+        else if(scene == fe::Scene::DUNGEON_SKY)
+        {
+            fe::Sky sky = fe::Sky();
+            scene = sky.execute(bn::fixed_point(67, 968));
+        }
+        else if(scene == fe::Scene::SKY_HOUSE)
+        {
+            fe::House house = fe::House();
+            scene = house.execute(bn::fixed_point(426, 246));
         }
 
         loading.execute();

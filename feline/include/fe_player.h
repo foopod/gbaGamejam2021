@@ -21,10 +21,13 @@ namespace fe
             bn::fixed _dy;
             bn::fixed_point _pos;
             bn::sprite_ptr _sprite;
+            bn::sprite_ptr _text_bg1;
+            bn::sprite_ptr _text_bg2;
             bn::camera_ptr _camera;
             bool _jumping = false;
             bool _falling = false;
             bool _running = false;
+            bool _listening = false;
             bool _grounded = false;
             bool _sliding = false;
             bool _already_running = false;
@@ -44,6 +47,7 @@ namespace fe
             void collide_with_objects(bn::affine_bg_ptr map, fe::Level level);
             void move_right();
             void move_left();
+            void set_listening(bool is_listening);
             void apply_animation_state();
             void update_position(bn::affine_bg_ptr map, fe::Level level);
     };

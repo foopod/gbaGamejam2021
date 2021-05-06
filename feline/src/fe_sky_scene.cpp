@@ -15,20 +15,20 @@
 #include "fe_level.h"
 #include "fe_player.h"
 #include "fe_scene.h"
+#include "fe_npc.h"
+#include "fe_npc_type.h"
 
 //assets
 #include "bn_sprite_items_cat.h"
 #include "bn_affine_bg_items_map.h"
 namespace fe
 {
-    Scene Sky::execute()
+    Scene Sky::execute(bn::fixed_point spawn)
     {
-        bn::fixed_point init_pos = bn::fixed_point(67, 968);
-
         // player sprite
-        bn::sprite_ptr cat_sprite = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y());
+        bn::sprite_ptr cat_sprite = bn::sprite_items::cat.create_sprite(spawn.x(), spawn.y());
         cat_sprite.set_bg_priority(1);
-        bn::camera_ptr camera = bn::camera_ptr::create(init_pos.x(), init_pos.y());
+        bn::camera_ptr camera = bn::camera_ptr::create(spawn.x(), spawn.y());
 
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::map.create_bg(512, 512);
@@ -41,25 +41,32 @@ namespace fe
         map.set_camera(camera);
 
         // player
-        fe::Player player = fe::Player(init_pos, cat_sprite, camera);
+        fe::Player player = fe::Player(spawn, cat_sprite, camera);
         while(true)
         {
             
+
             //elevator.update_position();
             player.update_position(map,level);
             player.apply_animation_state();
-            BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
+            // BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
             
             if(bn::keypad::up_pressed())
             {
                 if(player.pos().x() < 80 && player.pos().x() > 50){
                     if(player.pos().y() < 980 && player.pos().y() > 920){
-                        return Scene::DUNGEON;
+                        return Scene::SKY_DUNGEON;
+                    }
+                }
+
+                if(player.pos().x() < 660 && player.pos().x() > 640){
+                    if(player.pos().y() < 650 && player.pos().y() > 630){
+                        return Scene::SKY_HOUSE;
                     }
                 }
             }
             
-
+            
             bn::core::update();
         }
     }
