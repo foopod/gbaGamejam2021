@@ -38,12 +38,16 @@
 int main()
 {
     bn::core::init();
-    fe::Scene scene = fe::Scene::SKY_HOUSE;
+    fe::Scene scene = fe::Scene::HOUSE_START;
     fe::Loading loading = fe::Loading();
 
     while(true)
     {
-        if(scene == fe::Scene::HOUSE_SKY){
+        if(scene == fe::Scene::HOUSE_START){
+            fe::House house = fe::House();
+            scene = house.execute(bn::fixed_point(288, 292));
+        } 
+        else if(scene == fe::Scene::HOUSE_SKY){
             fe::Sky sky = fe::Sky();
             scene = sky.execute(bn::fixed_point(650, 648));
         } 
@@ -60,9 +64,9 @@ int main()
         else if(scene == fe::Scene::SKY_HOUSE)
         {
             fe::House house = fe::House();
-            scene = house.execute(bn::fixed_point(426, 246));
+            scene = house.execute(bn::fixed_point(710, 312));
         }
-
+        
         loading.execute();
         bn::core::update();
         

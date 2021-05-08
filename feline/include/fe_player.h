@@ -6,6 +6,8 @@
 #include "bn_camera_ptr.h"
 #include "bn_sprite_animate_actions.h"
 #include "bn_affine_bg_ptr.h"
+#include "bn_span.h"
+#include "bn_affine_bg_map_cell.h"
 
 #include "fe_level.h"
 #include "fe_hitbox.h"
@@ -31,15 +33,18 @@ namespace fe
             bool _grounded = false;
             bool _sliding = false;
             bool _already_running = false;
+            bn::span<const bn::affine_bg_map_cell> _map_cells;
             fe::Hitbox _hitbox_fall;
             fe::Hitbox _hitbox_left;
             fe::Hitbox _hitbox_right;
             fe::Hitbox _hitbox_jump;
             bn::sprite_animate_action<9> _action = bn::create_sprite_animate_action_forever(
                         _sprite, 6, bn::sprite_items::cat.tiles_item(), 0,0,0,0,0,0,0,0,0);
+            void _update_camera(int lerp);
+            
 
         public:
-            Player(bn::fixed_point pos, bn::sprite_ptr sprite, bn::camera_ptr camera);
+            Player(bn::fixed_point pos, bn::sprite_ptr sprite, bn::camera_ptr camera, bn::span<const bn::affine_bg_map_cell> map_cells);
             
             [[nodiscard]] bn::fixed_point pos();
 

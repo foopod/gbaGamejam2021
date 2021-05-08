@@ -10,6 +10,11 @@
 #include "bn_camera_ptr.h"
 #include "bn_regular_bg_ptr.h"
 #include "bn_affine_bg_ptr.h"
+#include "bn_affine_bg_map_ptr.h"
+#include "bn_optional.h"
+#include "bn_span.h"
+#include "bn_affine_bg_map_cell.h"
+
 
 //fe code
 #include "fe_level.h"
@@ -47,6 +52,7 @@ namespace fe
         fe::Level level = fe::Level(map);
         map.set_horizontal_scale(2);
         map.set_vertical_scale(2);
+        bn::span<const bn::affine_bg_map_cell> cells = map.map().cells_ref().value();
 
         // camera
         cat_sprite.set_camera(camera);
@@ -54,11 +60,24 @@ namespace fe
         map_bg.set_camera(camera);
         vines.set_camera(camera);
 
+        // bn::fixed max_cpu_usage;
+        // int counter = 1;
+
         // player
-        fe::Player player = fe::Player(spawn, cat_sprite, camera);
+        fe::Player player = fe::Player(spawn, cat_sprite, camera, cells);
 
         while(true)
         {
+
+            // max_cpu_usage = bn::max(max_cpu_usage, bn::core::last_cpu_usage());
+            // --counter;
+            // if(! counter)
+            // {
+            //     BN_LOG("cpu:" + bn::to_string<32>((max_cpu_usage * 100).right_shift_integer()));
+            //     max_cpu_usage = 0;
+            //     counter = 60;
+            // }
+
             if(golem.near_player(player.pos()))
             {
                 if(bn::keypad::a_pressed()){

@@ -18,21 +18,22 @@ namespace fe
         _floor_tiles = {};
         _wall_tiles = {};
         _ceil_tiles = {};
+        bn::span<const bn::affine_bg_map_cell> cells = bg.map().cells_ref().value();
         
         while (!processed_map)
         {
-            if(bg.map().cells_ref().value().at(index) == 0){
+            if(cells.at(index) == 0){
                 ++empties;
                 if(empties > 2){
                     processed_map = true;
                 }
             } else {
                 if(empties == 0){
-                    _floor_tiles.push_back(bg.map().cells_ref().value().at(index));
+                    _floor_tiles.push_back(cells.at(index));
                 } else if(empties == 1){
-                    _wall_tiles.push_back(bg.map().cells_ref().value().at(index));
+                    _wall_tiles.push_back(cells.at(index));
                 } else if(empties == 2){
-                    _ceil_tiles.push_back(bg.map().cells_ref().value().at(index));
+                    _ceil_tiles.push_back(cells.at(index));
                 }
             }
             ++index;

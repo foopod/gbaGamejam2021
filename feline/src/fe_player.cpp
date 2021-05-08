@@ -28,11 +28,11 @@ namespace fe
         return a - m * ((a/m).right_shift_integer());
     }
 
-    int get_map_cell(bn::fixed x, bn::fixed y, bn::affine_bg_ptr& map)
+    int get_map_cell(bn::fixed x, bn::fixed y, bn::affine_bg_ptr& map, bn::span<const bn::affine_bg_map_cell> cells)
     {
         int map_size = map.dimensions().width();
         int cell =  modulo((y.safe_division(8).right_shift_integer() * map_size/8 + x/8), map_size*8).integer();
-        return map.map().cells_ref().value().at(cell);
+        return cells.at(cell);
     }
 
     bool contains_cell(int tile, bn::vector<int, 32> tiles)
@@ -47,7 +47,7 @@ namespace fe
         return false;
     }
 
-    bool check_collisions_map(bn::fixed_point pos, directions direction, Hitbox hitbox,bn::affine_bg_ptr& map, fe::Level level)
+    bool check_collisions_map(bn::fixed_point pos, directions direction, Hitbox hitbox,bn::affine_bg_ptr& map, fe::Level level, bn::span<const bn::affine_bg_map_cell> cells)
     {
         int l = pos.x().integer()/2 - hitbox.width() / 2 + hitbox.x();
         int r = pos.x().integer()/2 + hitbox.width() / 2 + hitbox.x();
@@ -63,10 +63,10 @@ namespace fe
             tiles = level.ceil_tiles();
         }
 
-        if(contains_cell(get_map_cell(l, u, map), tiles) ||
-        contains_cell(get_map_cell(l, d, map), tiles) ||
-        contains_cell(get_map_cell(r, u, map), tiles) ||
-        contains_cell(get_map_cell(l, d, map), tiles)){
+        if(contains_cell(get_map_cell(l, u, map, cells), tiles) ||
+        contains_cell(get_map_cell(l, d, map, cells), tiles) ||
+        contains_cell(get_map_cell(r, u, map, cells), tiles) ||
+        contains_cell(get_map_cell(l, d, map, cells), tiles)){
             return true;
         } else {
             return false;
@@ -111,9 +111,10 @@ namespace fe
     constexpr const bn::fixed max_dy = 6;
     constexpr const bn::fixed friction = 0.85;
 
-    Player::Player(bn::fixed_point pos, bn::sprite_ptr sprite, bn::camera_ptr camera) :
+    Player::Player(bn::fixed_point pos, bn::sprite_ptr sprite, bn::camera_ptr camera, bn::span<const bn::affine_bg_map_cell> map_cells) :
         _pos(pos), _sprite(sprite), _camera(camera), _hitbox_fall(0,4,4,0), _hitbox_left(-2,0,2,4), _hitbox_right(2,0,2,4), _hitbox_jump(0,2,4,2),
-        _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),_text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0))
+        _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),_text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0)),
+        _map_cells(map_cells)
     {
         _sprite.set_horizontal_scale(2);
         _sprite.set_vertical_scale(2);
@@ -127,6 +128,8 @@ namespace fe
         _text_bg2.set_bg_priority(0);
         _text_bg2.put_above();
         _text_bg2.set_camera(_camera);
+
+        _update_camera(1);
     }
 
     bn::fixed_point Player::pos()
@@ -139,8 +142,6 @@ namespace fe
         _listening = is_listening;
         _text_bg1.set_visible(_listening);
         _text_bg2.set_visible(_listening);
-        _text_bg1.set_position(_camera.x()+64+8, _camera.y() + 40+24);
-        _text_bg2.set_position(_camera.x()-64+8, _camera.y() + 40+24);
     }
 
     void Player::jump()
@@ -163,22 +164,7 @@ namespace fe
                 _dy = max_dy;
             }
 
-            // if(check_collisions_elevator(_pos, _hitbox_fall, elevator, true))
-            // {
-            //     _grounded = true;
-            //     _falling = false;
-            //     _dy = 0;
-            //     _pos.set_y(elevator.top_y() -4);
-            // }
-            // else if(check_collisions_elevator(_pos, _hitbox_fall, elevator, false))
-            // {
-            //     _grounded = true;
-            //     _falling = false;
-            //     _dy = 0;
-            //     _pos.set_y(elevator.bottom_y() - 4);
-            // }
-            // else 
-            if(check_collisions_map(_pos, down, _hitbox_fall, map, level))
+            if(check_collisions_map(_pos, down, _hitbox_fall, map, level, _map_cells))
             {
                 _grounded = true;
                 _falling = false;
@@ -190,22 +176,21 @@ namespace fe
         else if(_dy < 0) // jumping
         {
             _jumping = true;
-            if(check_collisions_map(_pos, up, _hitbox_jump, map, level))
+            if(check_collisions_map(_pos, up, _hitbox_jump, map, level, _map_cells))
             {
                 _dy = 0;
             }
-            //todo collide upward maybe
         }
 
         if(_dx > 0) // moving right
         {
-            if(check_collisions_map(_pos, right,_hitbox_right, map, level)){
+            if(check_collisions_map(_pos, right,_hitbox_right, map, level, _map_cells)){
                 _dx = 0;
             }
         } 
         else if (_dx < 0) // moving left
         {
-            if(check_collisions_map(_pos, left, _hitbox_left, map, level)){
+            if(check_collisions_map(_pos, left, _hitbox_left, map, level, _map_cells)){
                 _dx = 0;
             }
         }
@@ -246,23 +231,36 @@ namespace fe
                     _sprite, 6, bn::sprite_items::cat.tiles_item(), 0,0,0,0,0,0,0,0,0);
         }
 
-        // dashing
-        // if(_dy < -8)
-        // {   
-        //     _action = bn::create_sprite_animate_action_forever(
-        //             _sprite, 6, bn::sprite_items::cat.tiles_item(), 12,12,12,12,12,12,12,12,12);    
-        // }
-        // else if(bn::abs(_dx) > 3)
-        // {
-        //     _action = bn::create_sprite_animate_action_forever(
-        //             _sprite, 6, bn::sprite_items::cat.tiles_item(), 11,11,11,11,11,11,11,11,11);
-        // }
-        //BN_LOG("running: " + bn::to_string<32>(_running));
-        
         _action.update();
     }
 
+    void Player::_update_camera(int lerp){
+        // update camera
+        if(_pos.x() < 122)
+        {
+            _camera.set_x(_camera.x()+ (122-_camera.x()) /lerp);
+        } else if (_pos.x() > 922-20){
+            _camera.set_x(_camera.x()+ (922-20-_camera.x()) /lerp);
+        }
+        else
+        {
+            if(_sprite.horizontal_flip()){
+                _camera.set_x(_camera.x()+ (_pos.x() - 20-_camera.x()) /lerp);
+            } else {
+                _camera.set_x(_camera.x()+ (_pos.x() +20 -_camera.x()) /lerp);
+            }            
+        }
+
+        if(_pos.y() < 942){
+            _camera.set_y(_camera.y()+ (_pos.y()-10-_camera.y()) /lerp);
+        } else {
+            _camera.set_y(_camera.y()+(942-_camera.y()) /lerp);
+        }
+    }
+
     void Player::update_position(bn::affine_bg_ptr map, fe::Level level){
+        _update_camera(10);
+
         // apply friction
         _dx = _dx * friction;
 
@@ -291,6 +289,11 @@ namespace fe
                 _sliding = false;
             }
         } 
+        
+        if(_listening){
+            _text_bg1.set_position(_camera.x()+64+8, _camera.y() + 40+24);
+            _text_bg2.set_position(_camera.x()-64+8, _camera.y() + 40+24);
+        }
 
         // jump
         if(bn::keypad::a_pressed())
@@ -298,28 +301,9 @@ namespace fe
             jump();
         } 
 
-        // dash
-        // if(bn::keypad::b_pressed())
-        // {
-        //     if(bn::keypad::up_held())
-        //     {
-        //         _dy = -9;
-        //     }
-        //     else if(_sprite.horizontal_flip())
-        //     {
-        //         _dx = -15;
-        //         _dy = -1;
-        //     }
-        //     else
-        //     {
-        //         _dx = 15;
-        //         _dy = -1;
-        //     }
-        // } 
-
         // collide
         collide_with_objects(map, level);
-        
+
         // update position
         _pos.set_x(_pos.x() + _dx);
         _pos.set_y(_pos.y() + _dy);
@@ -334,24 +318,6 @@ namespace fe
         // update sprite position
         _sprite.set_x(_pos.x());
         _sprite.set_y(_pos.y());
-
-        // update camera x
-        if(_pos.x() < 120)
-       {
-            _camera.set_x(120);
-        } else if (_pos.x() > 924-20){
-            _camera.set_x(924-20);
-        }
-        else 
-        {
-            _camera.set_x(_pos.x());
-        }
-
-        if(_pos.y() < 944){
-            _camera.set_y(_pos.y());
-        } else {
-            _camera.set_y(944);
-        }
 
     }
 }

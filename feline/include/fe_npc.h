@@ -57,7 +57,7 @@ namespace fe
                 "You have kids and a wife?",
                 "Glad they weren't here then.",
                 ". . . ",
-                "Oh dear, they were.",
+                "Oh dear, they were here?",
                 "These bastards can't have gone far.",
                 "The tortoise brigade is on the case."
             };

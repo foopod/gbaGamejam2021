@@ -5,6 +5,7 @@ namespace fe
 {
     enum class Scene
     {
+        HOUSE_START,
         HOUSE_SKY,
         SKY_HOUSE,
         SKY_DUNGEON,
