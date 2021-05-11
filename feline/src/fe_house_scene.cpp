@@ -23,7 +23,8 @@
 #include "fe_npc_type.h"
 
 //assets
-#include "bn_sprite_items_cat.h"
+#include "bn_sprite_items_cat_sprite.h"
+#include "bn_sprite_items_box.h"
 #include "bn_affine_bg_items_house.h"
 #include "bn_regular_bg_items_house_bg.h"
 
@@ -34,7 +35,7 @@ namespace fe
     {
 
         // player sprite
-        bn::sprite_ptr cat_sprite = bn::sprite_items::cat.create_sprite(spawn.x(), spawn.y());
+        bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(spawn.x(), spawn.y());
         cat_sprite.set_bg_priority(1);
         bn::camera_ptr camera = bn::camera_ptr::create(spawn.x(), spawn.y());
 
@@ -72,6 +73,7 @@ namespace fe
             //     max_cpu_usage = 0;
             //     counter = 60;
             // }
+
 
             if(tortoise.near_player(player.pos()))
             {

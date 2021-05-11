@@ -11,7 +11,7 @@
 #include "bn_span.h"
 #include "bn_log.h"
 
-#include "bn_sprite_items_cat.h"
+#include "bn_sprite_items_cat_sprite.h"
 #include "bn_sprite_items_text_bg.h"
 
 #include "fe_hitbox.h"
@@ -106,6 +106,7 @@ namespace fe
 
     //constants
     constexpr const bn::fixed gravity = 0.5;
+    constexpr const bn::fixed wall_run_speed =0.25;
     constexpr const bn::fixed jump_power = 7;
     constexpr const bn::fixed acc = 0.4;
     constexpr const bn::fixed max_dy = 6;
@@ -116,8 +117,6 @@ namespace fe
         _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),_text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0)),
         _map_cells(map_cells)
     {
-        _sprite.set_horizontal_scale(2);
-        _sprite.set_vertical_scale(2);
         _sprite.put_above();
 
         _text_bg1.set_scale(2);
@@ -149,13 +148,19 @@ namespace fe
         if(_grounded && !_listening){
             _dy-= jump_power;
             _grounded = false;
+        } else if (_wall_running){
+            _dy-= jump_power;
         }
     }
 
     void Player::collide_with_objects(bn::affine_bg_ptr map, fe::Level level){
         // if falling
         if(_dy > 0){
-            _falling = true;
+            if(!_wall_running){
+                _falling = true;
+            } else {
+                _falling = false;
+            }
             _grounded = false;
             _jumping = false;
             
@@ -167,6 +172,7 @@ namespace fe
             if(check_collisions_map(_pos, down, _hitbox_fall, map, level, _map_cells))
             {
                 _grounded = true;
+                _wall_running = false;
                 _falling = false;
                 _dy = 0;
                 _pos.set_y(_pos.y() - modulo(_pos.y() + 8,16));
@@ -175,10 +181,16 @@ namespace fe
         } 
         else if(_dy < 0) // jumping
         {
-            _jumping = true;
+            if(!_wall_running){
+                _jumping = true;
+            } else {
+                _jumping = false;
+            }
+            
             if(check_collisions_map(_pos, up, _hitbox_jump, map, level, _map_cells))
             {
                 _dy = 0;
+                _wall_running = false;
             }
         }
 
@@ -186,6 +198,7 @@ namespace fe
         {
             if(check_collisions_map(_pos, right,_hitbox_right, map, level, _map_cells)){
                 _dx = 0;
+                
             }
         } 
         else if (_dx < 0) // moving left
@@ -211,24 +224,33 @@ namespace fe
     }
 
     void Player::apply_animation_state(){
+        _sprite.set_vertical_scale(1);
         if(_jumping){
-            _action = bn::create_sprite_animate_action_once(
-                            _sprite, 6, bn::sprite_items::cat.tiles_item(), 9,9,9,9,9,9,9,9,9);
-        } else if(_falling){
-            _action = bn::create_sprite_animate_action_once(
-                            _sprite, 6, bn::sprite_items::cat.tiles_item(), 10,10,10,10,10,10,10,10,10);
-        } else if(_sliding){
-            _action = bn::create_sprite_animate_action_once(
-                            _sprite, 6, bn::sprite_items::cat.tiles_item(), 8,8,8,8,8,8,8,8,8);
-        } else if(_running){
-            if(_action.graphics_indexes().front() != 1){
+            _action = bn::create_sprite_animate_action_forever(
+                            _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 12,12,12,12,12,12,12,12,12,12);
+        } else if(_wall_running){
+            if(_action.graphics_indexes().front() != 8){
                 _action = bn::create_sprite_animate_action_forever(
-                        _sprite, 4, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8, 9);
+                            _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
+            }
+            _sprite.set_vertical_scale(0.9);
+        } else if(_falling){
+            _action = bn::create_sprite_animate_action_forever(
+                            _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 13,13,13,13,13,13,13,13,13,13);
+        } else if(_sliding){
+            _action = bn::create_sprite_animate_action_forever(
+                            _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 6,6,6,6,6,6,6,6,6,6);
+        } else if(_running){
+            if(_action.graphics_indexes().front() != 8){
+                _action = bn::create_sprite_animate_action_forever(
+                        _sprite, 2.5, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
             }
         } else {
             //idle
-            _action = bn::create_sprite_animate_action_once(
-                    _sprite, 6, bn::sprite_items::cat.tiles_item(), 0,0,0,0,0,0,0,0,0);
+            if(_action.graphics_indexes().front() != 0){
+                _action = bn::create_sprite_animate_action_forever(
+                        _sprite, 30, bn::sprite_items::cat_sprite.tiles_item(), 0,1,0,1,0,1,0,1,0,1);
+            }
         }
 
         _action.update();
@@ -236,18 +258,18 @@ namespace fe
 
     void Player::_update_camera(int lerp){
         // update camera
-        if(_pos.x() < 122)
+        if(_pos.x() < 122+30)
         {
             _camera.set_x(_camera.x()+ (122-_camera.x()) /lerp);
-        } else if (_pos.x() > 922-20){
+        } else if (_pos.x() > 922-30){
             _camera.set_x(_camera.x()+ (922-20-_camera.x()) /lerp);
         }
         else
         {
             if(_sprite.horizontal_flip()){
-                _camera.set_x(_camera.x()+ (_pos.x() - 20-_camera.x()) /lerp);
+                _camera.set_x(_camera.x()+ (_pos.x() - 30-_camera.x() + _dx*8) /lerp);
             } else {
-                _camera.set_x(_camera.x()+ (_pos.x() +20 -_camera.x()) /lerp);
+                _camera.set_x(_camera.x()+ (_pos.x() +30 -_camera.x() + _dx*8) /lerp);
             }            
         }
 
@@ -290,6 +312,16 @@ namespace fe
             }
         } 
         
+        if(bn::keypad::up_held()){
+            _wall_running = true;
+            if(_dy > 0){
+                _dy = _dy/2;
+            }
+            
+        } else {
+            _wall_running = false;
+        }
+        
         if(_listening){
             _text_bg1.set_position(_camera.x()+64+8, _camera.y() + 40+24);
             _text_bg2.set_position(_camera.x()-64+8, _camera.y() + 40+24);
@@ -309,8 +341,8 @@ namespace fe
         _pos.set_y(_pos.y() + _dy);
 
         // lock player position to map limits x
-        if(_pos.x() > 1020){
-            _pos.set_x(1020);
+        if(_pos.x() > 1016){
+            _pos.set_x(1016);
         } else if(_pos.x() < 4){
             _pos.set_x(4);
         }

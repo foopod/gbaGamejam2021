@@ -12,7 +12,7 @@
 #include "fe_level.h"
 #include "fe_hitbox.h"
 
-#include "bn_sprite_items_cat.h"
+#include "bn_sprite_items_cat_sprite.h"
 
 namespace fe
 {
@@ -32,14 +32,15 @@ namespace fe
             bool _listening = false;
             bool _grounded = false;
             bool _sliding = false;
+            bool _wall_running = false;
             bool _already_running = false;
             bn::span<const bn::affine_bg_map_cell> _map_cells;
             fe::Hitbox _hitbox_fall;
             fe::Hitbox _hitbox_left;
             fe::Hitbox _hitbox_right;
             fe::Hitbox _hitbox_jump;
-            bn::sprite_animate_action<9> _action = bn::create_sprite_animate_action_forever(
-                        _sprite, 6, bn::sprite_items::cat.tiles_item(), 0,0,0,0,0,0,0,0,0);
+            bn::sprite_animate_action<10> _action = bn::create_sprite_animate_action_forever(
+                        _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 0,1,0,1,0,1,0,1,0,1);
             void _update_camera(int lerp);
             
 

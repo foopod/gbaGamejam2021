@@ -24,7 +24,7 @@
 #include "fe_npc_type.h"
 
 //assets
-#include "bn_sprite_items_cat.h"
+#include "bn_sprite_items_cat_sprite.h"
 #include "bn_affine_bg_items_dungeon.h"
 #include "bn_regular_bg_items_dungeon_bg.h"
 #include "bn_regular_bg_items_vines.h"
@@ -35,12 +35,12 @@ namespace fe
     {
 
         // player sprite
-        bn::sprite_ptr cat_sprite = bn::sprite_items::cat.create_sprite(spawn.x(), spawn.y());
+        bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(spawn.x(), spawn.y());
         cat_sprite.set_bg_priority(1);
         bn::camera_ptr camera = bn::camera_ptr::create(spawn.x(), spawn.y());
 
         //NPC
-        NPC golem = NPC(bn::fixed_point(540, 960), camera, NPC_TYPE::GOLEM);
+        NPC golem = NPC(bn::fixed_point(640, 960), camera, NPC_TYPE::GOLEM);
 
         // map
         bn::regular_bg_ptr map_bg = bn::regular_bg_items::dungeon_bg.create_bg(512, 512);

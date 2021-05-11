@@ -38,7 +38,7 @@
 int main()
 {
     bn::core::init();
-    fe::Scene scene = fe::Scene::HOUSE_START;
+    fe::Scene scene = fe::Scene::SKY_DUNGEON;
     fe::Loading loading = fe::Loading();
 
     while(true)
