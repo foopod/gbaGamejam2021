@@ -2,27 +2,52 @@
 
 namespace fe
 {
-    Hitbox::Hitbox(int x, int y, int width, int height) : 
-        _x(x), _y(y), _width(width), _height(height)
+    Hitbox::Hitbox(bn::fixed x, bn::fixed y, bn::fixed width, bn::fixed height) : 
+        _pos(x, y), _width(width), _height(height)
     {}
 
-    int Hitbox::x()
+    bn::fixed_point Hitbox::pos()
     {
-        return _x;
+        return _pos;
     }
 
-    int Hitbox::y()
+    bn::fixed Hitbox::x()
     {
-        return _y;
+        return _pos.x();
     }
 
-    int Hitbox::width()
+    bn::fixed Hitbox::y()
+    {
+        return _pos.y();
+    }
+
+    bn::fixed Hitbox::width()
     {
         return _width;
     }
 
-    int Hitbox::height()
+    bn::fixed Hitbox::height()
     {
         return _height;
+    }
+
+    void Hitbox::set_x(bn::fixed x)
+    {
+        _pos.set_x(x);
+    }
+
+    void Hitbox::set_y(bn::fixed y)
+    {
+        _pos.set_y(y);
+    }
+
+    void Hitbox::set_width(bn::fixed width)
+    {
+        _width = width;
+    }
+
+    void Hitbox::set_height(bn::fixed height)
+    {
+        _height = height;
     }
 }

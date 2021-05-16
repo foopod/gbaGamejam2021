@@ -27,29 +27,26 @@
 #include "bn_affine_bg_items_map.h"
 namespace fe
 {
-    Scene Sky::execute(bn::fixed_point spawn)
+    Scene Sky::execute(Player player, bn::fixed_point spawn_location)
     {
-        // player sprite
-        bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(spawn.x(), spawn.y());
-        cat_sprite.set_bg_priority(1);
-        bn::camera_ptr camera = bn::camera_ptr::create(spawn.x(), spawn.y());
+        bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::map.create_bg(512, 512);
         fe::Level level = fe::Level(map);
         map.set_horizontal_scale(2);
         map.set_vertical_scale(2);
-        bn::span<const bn::affine_bg_map_cell> cells = map.map().cells_ref().value();
 
         // camera
-        cat_sprite.set_camera(camera);
         map.set_camera(camera);
         
         // bn::fixed max_cpu_usage;
         // int counter = 1;
 
+        bn::vector<Enemy, 32> enemies = {};
+
         // player
-        fe::Player player = fe::Player(spawn, cat_sprite, camera, cells);
+        player.spawn(spawn_location, camera, map, enemies);
         while(true)
         {
             

@@ -31,13 +31,10 @@
 
 namespace fe
 {
-    Scene House::execute(bn::fixed_point spawn)
+    Scene House::execute(Player player, bn::fixed_point spawn_location)
     {
 
-        // player sprite
-        bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(spawn.x(), spawn.y());
-        cat_sprite.set_bg_priority(1);
-        bn::camera_ptr camera = bn::camera_ptr::create(spawn.x(), spawn.y());
+        bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
         //NPC
         NPC tortoise = NPC(bn::fixed_point(535, 304), camera, NPC_TYPE::TORTOISE);
@@ -50,18 +47,17 @@ namespace fe
         fe::Level level = fe::Level(map);
         map.set_horizontal_scale(2);
         map.set_vertical_scale(2);
-        bn::span<const bn::affine_bg_map_cell> cells = map.map().cells_ref().value();
 
         // camera
-        cat_sprite.set_camera(camera);
         map.set_camera(camera);
         map_bg.set_camera(camera);
 
         // bn::fixed max_cpu_usage;
         // int counter = 1;
+        bn::vector<Enemy, 32> enemies = {};
 
         // player
-        fe::Player player = fe::Player(spawn, cat_sprite, camera, cells);
+        player.spawn(spawn_location, camera, map, enemies);
         while(true)
         {
 

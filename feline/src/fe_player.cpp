@@ -18,24 +18,24 @@
 #include "fe_player.h"
 #include "fe_elevator.h"
 #include "fe_level.h"
+#include "fe_extras.h"
+#include "fe_enemy.h"
+#include "fe_enemy_type.h"
+
+#include "bn_affine_bg_items_house.h"
 
 namespace fe
 {
     enum directions{up, down, left, right};
 
-    bn::fixed modulo(bn::fixed a, bn::fixed m)
-    {
-        return a - m * ((a/m).right_shift_integer());
-    }
-
-    int get_map_cell(bn::fixed x, bn::fixed y, bn::affine_bg_ptr& map, bn::span<const bn::affine_bg_map_cell> cells)
+    [[nodiscard]] int get_map_cell(bn::fixed x, bn::fixed y, bn::affine_bg_ptr& map, bn::span<const bn::affine_bg_map_cell> cells)
     {
         int map_size = map.dimensions().width();
         int cell =  modulo((y.safe_division(8).right_shift_integer() * map_size/8 + x/8), map_size*8).integer();
         return cells.at(cell);
     }
 
-    bool contains_cell(int tile, bn::vector<int, 32> tiles)
+    [[nodiscard]] bool contains_cell(int tile, bn::vector<int, 32> tiles)
     {
         for(int index = 0; index < tiles.size(); ++index)
         {
@@ -47,12 +47,12 @@ namespace fe
         return false;
     }
 
-    bool check_collisions_map(bn::fixed_point pos, directions direction, Hitbox hitbox,bn::affine_bg_ptr& map, fe::Level level, bn::span<const bn::affine_bg_map_cell> cells)
+    [[nodiscard]] bool check_collisions_map(bn::fixed_point pos, directions direction, Hitbox hitbox,bn::affine_bg_ptr& map, fe::Level level, bn::span<const bn::affine_bg_map_cell> cells)
     {
-        int l = pos.x().integer()/2 - hitbox.width() / 2 + hitbox.x();
-        int r = pos.x().integer()/2 + hitbox.width() / 2 + hitbox.x();
-        int u = pos.y().integer()/2 - hitbox.height() / 2 + hitbox.y();
-        int d = pos.y().integer()/2 + hitbox.height() / 2 + hitbox.y();
+        bn::fixed l = pos.x()/2 - hitbox.width() / 2 + hitbox.x();
+        bn::fixed r = pos.x()/2 + hitbox.width() / 2 + hitbox.x();
+        bn::fixed u = pos.y()/2 - hitbox.height() / 2 + hitbox.y();
+        bn::fixed d = pos.y()/2 + hitbox.height() / 2 + hitbox.y();
         
         bn::vector<int, 32> tiles;
         if(direction == down){
@@ -73,62 +73,64 @@ namespace fe
         }
     }
 
-    bool check_collisions_elevator(bn::fixed_point pos, fe::Hitbox hitbox, fe::Elevator elevator, bool is_top)
-    {
-        int l = pos.x().integer() - hitbox.width() / 2 + hitbox.x();
-        int r = pos.x().integer() + hitbox.width() / 2 + hitbox.x();
-        int u = pos.y().integer() - hitbox.height() / 2 + hitbox.y() + 2;
-        int d = pos.y().integer() + hitbox.height() / 2 + hitbox.y();
-        
-        // align left and right     
-        if((r > (elevator.pos().x().integer() -16)  && r < (elevator.pos().x().integer()+16))
-            || (l < (elevator.pos().x().integer()+16) && l > (elevator.pos().x().integer() -16)))
-        { 
-            if(is_top) //collide top of balloon
-            {
-                if((u > elevator.top_y() && u < elevator.top_y() + 8)
-                    || (d > elevator.top_y() && d < elevator.top_y() + 8))
-                {
-                    return true;
-                }
-            } else {//collide bottom of balloon
-                if((u > elevator.bottom_y() && u < elevator.bottom_y() + 8)
-                    || (d > elevator.bottom_y() && d < elevator.bottom_y() + 8)) // collide bottom
-                {
-                    return true;
-                }
-            }
-            
-        }
-        return false;
-
-    }
-
     //constants
-    constexpr const bn::fixed gravity = 0.5;
+    constexpr const bn::fixed gravity = 0.2;
     constexpr const bn::fixed wall_run_speed =0.25;
-    constexpr const bn::fixed jump_power = 7;
+    constexpr const bn::fixed jump_power = 4;
     constexpr const bn::fixed acc = 0.4;
     constexpr const bn::fixed max_dy = 6;
     constexpr const bn::fixed friction = 0.85;
 
-    Player::Player(bn::fixed_point pos, bn::sprite_ptr sprite, bn::camera_ptr camera, bn::span<const bn::affine_bg_map_cell> map_cells) :
-        _pos(pos), _sprite(sprite), _camera(camera), _hitbox_fall(0,4,4,0), _hitbox_left(-2,0,2,4), _hitbox_right(2,0,2,4), _hitbox_jump(0,2,4,2),
-        _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),_text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0)),
-        _map_cells(map_cells)
+    Player::Player(bn::sprite_ptr sprite) :
+        _sprite(sprite),
+        _camera(bn::camera_ptr::create(0,0)),
+        _map(bn::affine_bg_items::house.create_bg(0, 0)),
+        _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),
+        _text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0))
     {
+        _map.set_visible(false); // why can't I leave something uninitialised
         _sprite.put_above();
 
         _text_bg1.set_scale(2);
         _text_bg1.set_bg_priority(0);
         _text_bg1.put_above();
-        _text_bg1.set_camera(_camera);
         _text_bg2.set_scale(2);
         _text_bg2.set_bg_priority(0);
         _text_bg2.put_above();
-        _text_bg2.set_camera(_camera);
+    }
 
+    void Player::spawn(bn::fixed_point pos, bn::camera_ptr camera, bn::affine_bg_ptr map, bn::vector<Enemy,32>& enemies){
+        _pos = pos;
+        _camera = camera;
+        _map = map;
+        _map_cells = map.map().cells_ref().value();
+        _enemies = &enemies;
+        _map.set_visible(true);
+
+        reset();
+    }
+
+    void Player::reset(){
+        _sprite.set_camera(_camera);
+        _sprite.set_bg_priority(0);
+        _sprite.put_above();
+        _text_bg1.set_camera(_camera);
+        _text_bg2.set_camera(_camera);
         _update_camera(1);
+        _dy = 0;
+        _dy = 0;
+        _jumping = false;
+        _falling = false;
+        _running = false;
+        _listening = false;
+        _grounded = false;
+        _sliding = false;
+        _wall_running = false;
+        _wall_jumped = false;
+        _already_running = false;
+        _attacking = false;
+
+        _can_wallrun = false;
     }
 
     bn::fixed_point Player::pos()
@@ -143,14 +145,55 @@ namespace fe
         _text_bg2.set_visible(_listening);
     }
 
+    void Player::set_can_wallrun(bool can_wallrun)
+    {
+        _can_wallrun = can_wallrun;
+    }
+
     void Player::jump()
     {
         if(_grounded && !_listening){
             _dy-= jump_power;
             _grounded = false;
-        } else if (_wall_running){
+        } else if (_wall_running && !_wall_jumped){
             _dy-= jump_power;
+            _wall_jumped = true;
         }
+    }
+
+    void Player::attack()
+    {
+        _attacking = true;
+    }
+
+    bool Player::is_right()
+    {
+        return !_sprite.horizontal_flip();
+    }
+
+    void Player::check_attack(){
+        if(_attacking){
+            Hitbox attack_hitbox = Hitbox(_pos.x(),_pos.y(), 16, 16);
+            if(_sprite.horizontal_flip()){
+                attack_hitbox.set_x(_pos.x() - 8);
+            } else {
+                attack_hitbox.set_x(_pos.x() + 8);
+            }
+            
+            for(int i = 0; i < _enemies->size(); i++)
+            {
+                if(_enemies->at(i).is_hit(attack_hitbox))
+                {
+                    BN_LOG(_enemies->at(i).hp());
+                    if(_enemies->at(i).hp() > 0){
+                        _enemies->at(i).damage_from_left(1);
+                        BN_LOG(_enemies->at(i).hp());
+                    }
+                    
+                }
+            }
+        }
+        
     }
 
     void Player::collide_with_objects(bn::affine_bg_ptr map, fe::Level level){
@@ -172,6 +215,7 @@ namespace fe
             if(check_collisions_map(_pos, down, _hitbox_fall, map, level, _map_cells))
             {
                 _grounded = true;
+                _wall_jumped = false;
                 _wall_running = false;
                 _falling = false;
                 _dy = 0;
@@ -224,14 +268,23 @@ namespace fe
     }
 
     void Player::apply_animation_state(){
+
+        if(_attacking && _action.done()){
+            _attacking = false;
+        }
         _sprite.set_vertical_scale(1);
-        if(_jumping){
+        if(_attacking){
+            if(_action.graphics_indexes().front() != 14){
+                _action = bn::create_sprite_animate_action_once(
+                            _sprite, 1, bn::sprite_items::cat_sprite.tiles_item(), 14,14,14,14,14,14,14,14,15,15);
+            }
+        } else if(_jumping){
             _action = bn::create_sprite_animate_action_forever(
                             _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 12,12,12,12,12,12,12,12,12,12);
         } else if(_wall_running){
             if(_action.graphics_indexes().front() != 8){
                 _action = bn::create_sprite_animate_action_forever(
-                            _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
+                            _sprite, 2.5, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
             }
             _sprite.set_vertical_scale(0.9);
         } else if(_falling){
@@ -313,9 +366,9 @@ namespace fe
         } 
         
         if(bn::keypad::up_held()){
-            _wall_running = true;
-            if(_dy > 0){
-                _dy = _dy/2;
+            if(_dy > 0 && bn::abs(_dx) > 1 && !_wall_jumped && _can_wallrun){
+                _wall_running = true;
+                _dy = _dy / 2;
             }
             
         } else {
@@ -332,6 +385,14 @@ namespace fe
         {
             jump();
         } 
+
+        // attack
+        if(bn::keypad::b_pressed())
+        {
+            attack();
+        } 
+
+        check_attack();
 
         // collide
         collide_with_objects(map, level);
