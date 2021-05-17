@@ -6,9 +6,8 @@ Devlog has moved to [my site](https://jonoshields.com/gbagamejam2021/) to make i
 
 I still keep my to-do list here though...
 
-+ Add enemies get hurt
 + Add player can get hurt
-+ Add basic enemy AI
++ Add basic enemy AI for BAT
 
 Notes:
 

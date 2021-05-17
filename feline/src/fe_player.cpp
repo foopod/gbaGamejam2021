@@ -184,10 +184,10 @@ namespace fe
             {
                 if(_enemies->at(i).is_hit(attack_hitbox))
                 {
-                    BN_LOG(_enemies->at(i).hp());
-                    if(_enemies->at(i).hp() > 0){
+                    if(_sprite.horizontal_flip()){
                         _enemies->at(i).damage_from_left(1);
-                        BN_LOG(_enemies->at(i).hp());
+                    } else {
+                        _enemies->at(i).damage_from_right(1);
                     }
                     
                 }

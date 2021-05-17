@@ -16,6 +16,7 @@
 
 namespace fe
 {
+    
     [[nodiscard]] bool check_collisions_bb(Hitbox boxA, Hitbox boxB){
         bool result =  boxA.x() - boxA.width()/2 < boxB.x() + boxB.width()/2 &&
             boxA.x() + boxA.width()/2 > boxB.x() - boxB.width()/2 &&
