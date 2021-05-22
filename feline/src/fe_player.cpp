@@ -86,7 +86,8 @@ namespace fe
         _camera(bn::camera_ptr::create(0,0)),
         _map(bn::affine_bg_items::house.create_bg(0, 0)),
         _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),
-        _text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0))
+        _text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0)),
+        _healthbar(fe::Healthbar())
     {
         _map.set_visible(false); // why can't I leave something uninitialised
         _sprite.put_above();
@@ -106,13 +107,14 @@ namespace fe
         _map_cells = map.map().cells_ref().value();
         _enemies = &enemies;
         _map.set_visible(true);
+        _sprite.set_visible(true);
 
         reset();
     }
 
     void Player::reset(){
         _sprite.set_camera(_camera);
-        _sprite.set_bg_priority(0);
+        _sprite.set_bg_priority(1);
         _sprite.put_above();
         _text_bg1.set_camera(_camera);
         _text_bg2.set_camera(_camera);
@@ -148,6 +150,11 @@ namespace fe
     void Player::set_can_wallrun(bool can_wallrun)
     {
         _can_wallrun = can_wallrun;
+    }
+
+    bool Player::is_listening()
+    {
+        return _listening;
     }
 
     void Player::jump()

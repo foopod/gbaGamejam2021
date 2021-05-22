@@ -21,6 +21,7 @@
 #include "fe_scene.h"
 #include "fe_npc.h"
 #include "fe_npc_type.h"
+#include "fe_tooltip.h"
 
 //assets
 #include "bn_sprite_items_cat_sprite.h"
@@ -33,11 +34,13 @@ namespace fe
 {
     Scene House::execute(Player player, bn::fixed_point spawn_location)
     {
+        bn::sprite_text_generator text_generator(variable_8x8_sprite_font);
 
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
         //NPC
         NPC tortoise = NPC(bn::fixed_point(535, 304), camera, NPC_TYPE::TORTOISE);
+        Tooltip explain_attack = Tooltip(bn::fixed_point(440, 304),"Press 'B' to Attack", text_generator);
 
         // map
         bn::regular_bg_ptr map_bg = bn::regular_bg_items::house_bg.create_bg(512, 512);
@@ -81,6 +84,10 @@ namespace fe
                 }
             }
             tortoise.update();
+
+            
+            player.set_listening(explain_attack.check_trigger(player.pos()));
+            explain_attack.update();
 
             //elevator.update_position();
             player.update_position(map,level);

@@ -12,6 +12,7 @@
 #include "fe_level.h"
 #include "fe_hitbox.h"
 #include "fe_enemy.h"
+#include "fe_healthbar.h"
 
 #include "bn_sprite_items_cat_sprite.h"
 
@@ -27,6 +28,7 @@ namespace fe
             bn::camera_ptr _camera;
             bn::sprite_ptr _text_bg1;
             bn::sprite_ptr _text_bg2;
+            fe::Healthbar _healthbar;
             
             bool _can_wallrun = false;
 
@@ -67,6 +69,7 @@ namespace fe
             void move_left();
             void check_attack();
             void set_listening(bool is_listening);
+            bool is_listening();
             void set_can_wallrun(bool can_wallrun);
             void apply_animation_state();
             void update_position(bn::affine_bg_ptr map, fe::Level level);

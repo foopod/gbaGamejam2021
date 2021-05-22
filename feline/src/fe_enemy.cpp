@@ -87,8 +87,12 @@ namespace fe
             _sprite.value().set_camera(_camera);
             _sprite.value().set_bg_priority(1);
             _action = bn::create_sprite_animate_action_forever(
-                            _sprite.value(), 20, bn::sprite_items::slime_sprite.tiles_item(), 0,1,0,1);
+                             _sprite.value(), 20, bn::sprite_items::slime_sprite.tiles_item(), 0,1,0,1);
         }
+    }
+
+    void Enemy::set_visible(bool visiblity){
+        _sprite.value().set_visible(visiblity);
     }
 
     bool Enemy::damage_from_left(int damage){
@@ -121,7 +125,6 @@ namespace fe
                         _sprite.value(), 5, bn::sprite_items::bat_sprite.tiles_item(), 2,3,3,3);
                 }
                 
-                _dead = true;
                 return true;
             }
         }
@@ -163,89 +166,98 @@ namespace fe
     }
 
     void Enemy::update(){
-        //dead check
-        if(_action.value().done()){
-            _sprite.value().set_visible(false);
-        }
-
-        if(_invulnerable){
-            ++_inv_timer;
-            if(_inv_timer > 20){
-                _inv_timer = 0;
-                _invulnerable = false;
+        if(!_dead)
+        {   
+            if(!_sprite.value().visible())
+            {
+                _sprite.value().set_visible(true);
             }
-        }
 
-        if(_direction_timer > 200){
-            // do nothing
-        } else{
-            ++_direction_timer;
-        }
-
-        //apply gravity
-        if(_type != ENEMY_TYPE::BAT)
-        {
-            _dy += gravity;
-        }
-
-
-        if(_type == ENEMY_TYPE::BAT){
-            if(_pos.x() < 200){
-                _dir = 1;
-                _sprite.value().set_horizontal_flip(false);
-            } else if(_pos.x() > 400){
-                _dir = -1;
-                _sprite.value().set_horizontal_flip(true);
+            //dead check
+            if(_action.value().done()){
+                _sprite.value().set_visible(false);
+                _dead = true;
             }
-            _pos.set_x(_pos.x() + _dir);
-        } 
-        else if(_type == ENEMY_TYPE::SLIME)
-        {
-            if(!_invulnerable && _grounded && _direction_timer > 60){
-                if(_will_fall_or_hit_wall()){
-                    _dx = 0;
-                    _dir = -_dir;
-                    _direction_timer = 0;
-                    _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
+
+            if(_invulnerable){
+                ++_inv_timer;
+                if(_inv_timer > 20){
+                    _inv_timer = 0;
+                    _invulnerable = false;
                 }
+            }
+
+            if(_direction_timer > 200){
+                // do nothing
+            } else{
+                ++_direction_timer;
+            }
+
+            //apply gravity
+            if(_type != ENEMY_TYPE::BAT)
+            {
+                _dy += gravity;
+            }
+
+
+            if(_type == ENEMY_TYPE::BAT){
+                if(_pos.x() < 200){
+                    _dir = 1;
+                    _sprite.value().set_horizontal_flip(false);
+                } else if(_pos.x() > 400){
+                    _dir = -1;
+                    _sprite.value().set_horizontal_flip(true);
+                }
+                _pos.set_x(_pos.x() + _dir);
             } 
-            if((_action.value().current_index() == 1 || _action.value().current_index() == 3)  && !_invulnerable && _grounded){
-                _dx += _dir*acc;
-            }
-            _dx = _dx * friction;
-
-            if(_dy > 0){
-                if(_check_collisions_map(_pos, Hitbox(0,4,4,0), directions::down, _map, _level, _map_cells)){
-                    _dy = 0;
-                    // BN_LOG(bn::to_string<32>(_pos.x())+" " + bn::to_string<32>(_pos.y()));
-                    _pos.set_y(_pos.y() - modulo(_pos.y() -8,16));
-                    _grounded = true;
-                } else {
-                    _grounded = false;
+            else if(_type == ENEMY_TYPE::SLIME)
+            {
+                if(!_invulnerable && _grounded && _direction_timer > 60){
+                    if(_will_fall_or_hit_wall()){
+                        _dx = 0;
+                        _dir = -_dir;
+                        _direction_timer = 0;
+                        _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
+                    }
+                } 
+                if((_action.value().current_index() == 1 || _action.value().current_index() == 3)  && !_invulnerable && _grounded){
+                    _dx += _dir*acc;
                 }
-            }
+                _dx = _dx * friction;
 
-            if(bn::abs(_dx) > 0){
-                if(_check_collisions_map(_pos, Hitbox(0, 0, 2, 4), directions::left, _map, _level, _map_cells) ||
-                _check_collisions_map(_pos, Hitbox(0, 0, 2, 4), directions::left, _map, _level, _map_cells)){
-                    _dx = -_dx;
-                    _direction_timer = 0;
+                if(_dy > 0){
+                    if(_check_collisions_map(_pos, Hitbox(0,4,4,0), directions::down, _map, _level, _map_cells)){
+                        _dy = 0;
+                        // BN_LOG(bn::to_string<32>(_pos.x())+" " + bn::to_string<32>(_pos.y()));
+                        _pos.set_y(_pos.y() - modulo(_pos.y() -8,16));
+                        _grounded = true;
+                    } else {
+                        _grounded = false;
+                    }
                 }
+
+                if(bn::abs(_dx) > 0){
+                    if(_check_collisions_map(_pos, Hitbox(0, 0, 2, 4), directions::left, _map, _level, _map_cells) ||
+                    _check_collisions_map(_pos, Hitbox(0, 0, 2, 4), directions::left, _map, _level, _map_cells)){
+                        _dx = -_dx;
+                        _direction_timer = 0;
+                    }
+                }
+
+                //max
+                if(_dy > max_dy){
+                    _dy = max_dy;
+                }
+
+                _pos.set_x(_pos.x() + _dx);
+                _pos.set_y(_pos.y() + _dy);
+
             }
 
-            //max
-            if(_dy > max_dy){
-                _dy = max_dy;
-            }
-
-            _pos.set_x(_pos.x() + _dx);
-            _pos.set_y(_pos.y() + _dy);
-
+            _sprite.value().set_position(_pos);
+            if(!_action.value().done()){
+                _action.value().update();
+            }        
         }
-
-        _sprite.value().set_position(_pos);
-        if(!_action.value().done()){
-            _action.value().update();
-        }        
     }
 }

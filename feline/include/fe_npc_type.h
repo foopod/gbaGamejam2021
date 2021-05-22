@@ -6,9 +6,8 @@ namespace fe
     enum class NPC_TYPE
     {
         GOLEM,
-        FROG,
-        TORTOISE,
-        KITTY
+        PENGUIN,
+        TORTOISE
     };
 }
 

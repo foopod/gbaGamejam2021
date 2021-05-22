@@ -50,6 +50,7 @@ namespace fe
             void update();
             bn::fixed_point pos();
             bool is_hit(Hitbox attack);
+            void set_visible(bool visibility);
             bool damage_from_left(int damage);
             bool damage_from_right(int damage);
             int hp();

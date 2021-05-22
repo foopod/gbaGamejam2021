@@ -31,6 +31,9 @@ namespace fe
     {
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
+        //NPC
+        NPC penguin = NPC(bn::fixed_point(850, 984), camera, NPC_TYPE::PENGUIN);
+
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::map.create_bg(512, 512);
         fe::Level level = fe::Level(map);
@@ -59,7 +62,17 @@ namespace fe
             //     counter = 60;
             // }
 
-            //elevator.update_position();
+            if(penguin.near_player(player.pos()))
+            {
+                if(bn::keypad::a_pressed()){
+                    player.set_listening(true);
+                    penguin.talk();
+                }else if(!penguin.is_talking()){
+                    player.set_listening(false);
+                }
+            }
+            penguin.update();
+
             player.update_position(map, level);
             player.apply_animation_state();
             // BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
@@ -72,8 +85,8 @@ namespace fe
                     }
                 }
 
-                if(player.pos().x() < 660 && player.pos().x() > 640){
-                    if(player.pos().y() < 650 && player.pos().y() > 630){
+                if(player.pos().x() < 220 && player.pos().x() > 200){
+                    if(player.pos().y() < 730 && player.pos().y() > 720){
                         return Scene::SKY_HOUSE;
                     }
                 }

@@ -46,7 +46,7 @@ int main()
         } 
         else if(scene == fe::Scene::HOUSE_SKY){
             fe::Sky sky = fe::Sky();
-            scene = sky.execute(player, bn::fixed_point(650, 648));
+            scene = sky.execute(player, bn::fixed_point(213, 728));
         } 
         else if(scene == fe::Scene::SKY_DUNGEON)
         {
@@ -63,7 +63,7 @@ int main()
             fe::House house = fe::House();
             scene = house.execute(player, bn::fixed_point(710, 312));
         }
-        
+        cat_sprite.set_visible(false);
         loading.execute();
         bn::core::update();
         

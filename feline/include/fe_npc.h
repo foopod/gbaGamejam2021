@@ -24,6 +24,8 @@ namespace fe
             bn::optional<bn::sprite_animate_action<2>> _action;
             bool _is_talking = false;
             bool _is_near_player = false;
+            bool _finished_talking = false;
+            bool _has_spoken_once = false;
 
             bn::span<bn::string_view> _lines;
             int _currentLine = 0;
@@ -62,6 +64,13 @@ namespace fe
                 "The tortoise brigade is on the case."
             };
 
+            bn::string_view _penguin_lines[4] = {
+                "Oh to fly..",
+                "To soar through the sky",
+                "There is nothing I want to do more",
+                ". . ."
+            };
+
         public:
             NPC(bn::fixed_point pos, bn::camera_ptr camera, NPC_TYPE type);
             void update();
@@ -69,6 +78,7 @@ namespace fe
             bool near_player(bn::fixed_point player_pos);
             bool is_talking();
             void talk();
+            bool finished_talking();
             
     };
 }

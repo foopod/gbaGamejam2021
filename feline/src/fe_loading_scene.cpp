@@ -18,7 +18,7 @@
 #include "fe_loading_scene.h"
 
 //assets
-#include "bn_sprite_items_cat.h"
+#include "bn_sprite_items_cat_sprite.h"
 #include "bn_affine_bg_items_loading_bg.h"
 
 namespace fe
@@ -28,32 +28,22 @@ namespace fe
         bn::fixed_point init_pos = bn::fixed_point(0, 0);
 
         // player sprite
-        bn::sprite_ptr cat_sprite1 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y()-50);
-        cat_sprite1.set_horizontal_scale(2);
-        cat_sprite1.set_vertical_scale(2);
-        bn::sprite_ptr cat_sprite2 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y()-25);
-        cat_sprite2.set_horizontal_scale(2);
-        cat_sprite2.set_vertical_scale(2);
-        bn::sprite_ptr cat_sprite3 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y()+25);
-        cat_sprite3.set_horizontal_scale(2);
-        cat_sprite3.set_vertical_scale(2);
-        bn::sprite_ptr cat_sprite4 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y()+50);
-        cat_sprite4.set_horizontal_scale(2);
-        cat_sprite4.set_vertical_scale(2);
-        bn::sprite_ptr cat_sprite5 = bn::sprite_items::cat.create_sprite(init_pos.x(), init_pos.y());
-        cat_sprite5.set_horizontal_scale(2);
-        cat_sprite5.set_vertical_scale(2);
+        bn::sprite_ptr cat_sprite1 = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y()-50);
+        bn::sprite_ptr cat_sprite2 = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y()-25);
+        bn::sprite_ptr cat_sprite3 = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y()+25);
+        bn::sprite_ptr cat_sprite4 = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y()+50);
+        bn::sprite_ptr cat_sprite5 = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y());
         
-        bn::sprite_animate_action<8> action1 = bn::create_sprite_animate_action_forever(
-                        cat_sprite1, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
-        bn::sprite_animate_action<8> action2 = bn::create_sprite_animate_action_forever(
-                        cat_sprite2, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
-        bn::sprite_animate_action<8> action3 = bn::create_sprite_animate_action_forever(
-                        cat_sprite3, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
-        bn::sprite_animate_action<8> action4 = bn::create_sprite_animate_action_forever(
-                        cat_sprite4, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
-        bn::sprite_animate_action<8> action5 = bn::create_sprite_animate_action_forever(
-                        cat_sprite5, 2, bn::sprite_items::cat.tiles_item(), 1, 2, 3, 4, 5, 6, 7, 8);
+        bn::sprite_animate_action<10> action1 = bn::create_sprite_animate_action_forever(
+                        cat_sprite1, 2, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
+        bn::sprite_animate_action<10> action2 = bn::create_sprite_animate_action_forever(
+                        cat_sprite2, 2, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
+        bn::sprite_animate_action<10> action3 = bn::create_sprite_animate_action_forever(
+                        cat_sprite3, 2, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
+        bn::sprite_animate_action<10> action4 = bn::create_sprite_animate_action_forever(
+                        cat_sprite4, 2, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
+        bn::sprite_animate_action<10> action5 = bn::create_sprite_animate_action_forever(
+                        cat_sprite5, 2, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
 
         bn::camera_ptr camera = bn::camera_ptr::create(init_pos.x()+100, init_pos.y());
 
