@@ -39,7 +39,7 @@ namespace fe
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
         //NPC
-        NPC tortoise = NPC(bn::fixed_point(535, 304), camera, NPC_TYPE::TORTOISE);
+        NPC tortoise = NPC(bn::fixed_point(535, 304), camera, NPC_TYPE::TORTOISE, text_generator);
         Tooltip explain_attack = Tooltip(bn::fixed_point(440, 304),"Press 'B' to Attack", text_generator);
 
         // map
@@ -74,7 +74,7 @@ namespace fe
             // }
 
 
-            if(tortoise.near_player(player.pos()))
+            if(tortoise.check_trigger(player.pos()))
             {
                 if(bn::keypad::a_pressed()){
                     player.set_listening(true);

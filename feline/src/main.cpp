@@ -32,7 +32,7 @@
 int main()
 {
     bn::core::init();
-    fe::Scene scene = fe::Scene::SKY_DUNGEON;
+    fe::Scene scene = fe::Scene::HOUSE_START;
     fe::Loading loading = fe::Loading();
 
     bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(0,0);

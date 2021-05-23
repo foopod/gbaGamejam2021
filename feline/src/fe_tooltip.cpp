@@ -24,7 +24,7 @@ namespace fe
 
     void Tooltip::update(){
         if(_is_talking){
-            if(_currentChar == _line.size() * 1){
+            if(_currentChar == _line.size()){
                 if(bn::keypad::a_pressed())
                 {
                     _is_talking = false;

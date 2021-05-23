@@ -48,8 +48,8 @@ namespace fe
         bn::music_items::house.play();
 
         //NPC
-        NPC golem = NPC(bn::fixed_point(550, 944), camera, NPC_TYPE::GOLEM);
-        Tooltip explain_attack = Tooltip(bn::fixed_point(117, 952),"Press 'B' to Attack", text_generator);
+        NPC golem = NPC(bn::fixed_point(550, 944), camera, NPC_TYPE::GOLEM, text_generator);
+        Tooltip explain_attack = Tooltip(bn::fixed_point(147, 952),"Press 'B' to Attack", text_generator);
         
 
         // map
@@ -97,7 +97,7 @@ namespace fe
             //     counter = 60;
             // }
 
-            if(golem.near_player(player.pos()))
+            if(golem.check_trigger(player.pos()))
             {
                 if(bn::keypad::a_pressed()){
                     player.set_listening(true);
@@ -105,11 +105,15 @@ namespace fe
                 }else if(!golem.is_talking()){
                     player.set_listening(false);
                 }
+            } else if(explain_attack.check_trigger(player.pos())){
+                player.set_listening(true);
+            } else {
+                player.set_listening(false);
             }
+
             golem.update();
-           
-            player.set_listening(explain_attack.check_trigger(player.pos()));
             explain_attack.update();
+            
 
             for(Enemy& enemy : enemies){
                 if(bn::abs(enemy.pos().x() - camera.x()) < 240 && bn::abs(enemy.pos().y() - camera.y()) < 160){
@@ -122,7 +126,7 @@ namespace fe
             player.update_position(map,level);
             player.apply_animation_state();
 
-            vines.set_position(bn::fixed_point((player.pos().x())/10,(player.pos().y())/10));
+            vines.set_position(bn::fixed_point((player.pos().x()-500)/10,(player.pos().y())/10));
             // BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
 
             //door

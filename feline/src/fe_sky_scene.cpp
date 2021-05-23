@@ -25,14 +25,20 @@
 //assets
 #include "bn_sprite_items_cat_sprite.h"
 #include "bn_affine_bg_items_map.h"
+
+#include "bn_sprite_text_generator.h"
+#include "variable_8x8_sprite_font.h"
+
 namespace fe
 {
     Scene Sky::execute(Player player, bn::fixed_point spawn_location)
     {
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
+        bn::sprite_text_generator text_generator(variable_8x8_sprite_font);
+
         //NPC
-        NPC penguin = NPC(bn::fixed_point(850, 984), camera, NPC_TYPE::PENGUIN);
+        NPC penguin = NPC(bn::fixed_point(850, 984), camera, NPC_TYPE::PENGUIN, text_generator);
 
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::map.create_bg(512, 512);
@@ -62,7 +68,7 @@ namespace fe
             //     counter = 60;
             // }
 
-            if(penguin.near_player(player.pos()))
+            if(penguin.check_trigger(player.pos()))
             {
                 if(bn::keypad::a_pressed()){
                     player.set_listening(true);
