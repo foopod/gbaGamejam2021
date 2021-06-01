@@ -23,7 +23,7 @@ namespace fe
         private:
             NPC_TYPE _type;
             bn::fixed_point _pos;
-            bn::camera_ptr _camera;
+            bn::camera_ptr& _camera;
             bn::optional<bn::sprite_ptr> _sprite;
             bn::optional<bn::sprite_animate_action<2>> _action;
             bool _is_talking = false;
@@ -32,7 +32,7 @@ namespace fe
             bool _has_spoken_once = false;
 
             bn::vector<bn::sprite_ptr, 32> _text_sprites;
-            bn::sprite_text_generator* _text_generator;
+            bn::sprite_text_generator& _text_generator;
 
             const bn::fixed _text_y_inc = 14;
             const bn::fixed _text_y_limit = (bn::display::height() / 2) - _text_y_inc;
@@ -56,7 +56,7 @@ namespace fe
                 "I don't know if they came passed me.",
                 "I haven't awoken for many centuries now.",
                 "You see..",
-                "*he motions towards the sprawling cobwebs*"
+                "*they motion toward the sprawling cobwebs*"
             };
 
             bn::string_view _tortoise_lines[12] = {
@@ -82,7 +82,7 @@ namespace fe
             };
 
         public:
-            NPC(bn::fixed_point pos, bn::camera_ptr camera, NPC_TYPE type, bn::sprite_text_generator& text_generator);
+            NPC(bn::fixed_point pos, bn::camera_ptr& camera, NPC_TYPE type, bn::sprite_text_generator& text_generator);
             void update();
             bn::fixed_point pos();
             bool check_trigger(bn::fixed_point player_pos);

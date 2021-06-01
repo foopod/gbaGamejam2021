@@ -21,10 +21,10 @@
 #include "bn_sprite_text_generator.h"
 
 #include "fe_hitbox.h"
-#include "fe_dungeon_scene.h"
-#include "fe_sky_scene.h"
-#include "fe_house_scene.h"
-#include "fe_loading_scene.h"
+#include "fe_scene_dungeon.h"
+#include "fe_scene_sky.h"
+#include "fe_scene_house.h"
+#include "fe_scene_loading.h"
 #include "fe_scene.h"
 
 #include "bn_sprite_items_cat_sprite.h"
@@ -32,7 +32,7 @@
 int main()
 {
     bn::core::init();
-    fe::Scene scene = fe::Scene::HOUSE_START;
+    fe::Scene scene = fe::Scene::SKY_DUNGEON;
     fe::Loading loading = fe::Loading();
 
     bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(0,0);
@@ -51,7 +51,7 @@ int main()
         else if(scene == fe::Scene::SKY_DUNGEON)
         {
             fe::Dungeon dungeon = fe::Dungeon();
-            scene = dungeon.execute(player, bn::fixed_point(112, 952));
+            scene = dungeon.execute(player, bn::fixed_point(150, 192));
         } 
         else if(scene == fe::Scene::DUNGEON_SKY)
         {

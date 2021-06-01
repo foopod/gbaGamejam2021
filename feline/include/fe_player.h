@@ -12,6 +12,7 @@
 #include "fe_level.h"
 #include "fe_hitbox.h"
 #include "fe_enemy.h"
+#include "fe_data.h"
 #include "fe_healthbar.h"
 
 #include "bn_sprite_items_cat_sprite.h"
@@ -44,14 +45,17 @@ namespace fe
             bool _already_running = false;
             bool _attacking = false;
 
+            bool _invulnerable = false;
+            int _inv_timer = 0;
+
             bn::span<const bn::affine_bg_map_cell> _map_cells;
             bn::affine_bg_ptr _map;
             bn::vector<Enemy,32>* _enemies;
 
-            fe::Hitbox _hitbox_fall = Hitbox(0,4,4,0);
-            fe::Hitbox _hitbox_left = Hitbox(-2,0,2,4);
-            fe::Hitbox _hitbox_right = Hitbox(2,0,2,4);
-            fe::Hitbox _hitbox_jump = Hitbox(0,2,4,2);
+            fe::Hitbox _hitbox_fall = Hitbox(0,8,8,0);
+            fe::Hitbox _hitbox_left = Hitbox(-4,0,4,8);
+            fe::Hitbox _hitbox_right = Hitbox(4,0,4,8);
+            fe::Hitbox _hitbox_jump = Hitbox(0,4,8,4);
             bn::sprite_animate_action<10> _action = bn::create_sprite_animate_action_forever(
                         _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 0,1,0,1,0,1,0,1,0,1);
             void _update_camera(int lerp);
@@ -59,12 +63,15 @@ namespace fe
 
         public:
             Player(bn::sprite_ptr sprite);
+
+            Data data;
             
             [[nodiscard]] bn::fixed_point pos();
 
             void jump();
             void attack();
             void collide_with_objects(bn::affine_bg_ptr map, fe::Level level);
+            void collide_with_enemies();
             void move_right();
             void move_left();
             void check_attack();

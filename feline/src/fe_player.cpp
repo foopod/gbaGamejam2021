@@ -49,10 +49,10 @@ namespace fe
 
     [[nodiscard]] bool check_collisions_map(bn::fixed_point pos, directions direction, Hitbox hitbox,bn::affine_bg_ptr& map, fe::Level level, bn::span<const bn::affine_bg_map_cell> cells)
     {
-        bn::fixed l = pos.x()/2 - hitbox.width() / 2 + hitbox.x();
-        bn::fixed r = pos.x()/2 + hitbox.width() / 2 + hitbox.x();
-        bn::fixed u = pos.y()/2 - hitbox.height() / 2 + hitbox.y();
-        bn::fixed d = pos.y()/2 + hitbox.height() / 2 + hitbox.y();
+        bn::fixed l = pos.x() - hitbox.width() / 2 + hitbox.x();
+        bn::fixed r = pos.x() + hitbox.width() / 2 + hitbox.x();
+        bn::fixed u = pos.y() - hitbox.height() / 2 + hitbox.y();
+        bn::fixed d = pos.y() + hitbox.height() / 2 + hitbox.y();
         
         bn::vector<int, 32> tiles;
         if(direction == down){
@@ -180,7 +180,7 @@ namespace fe
 
     void Player::check_attack(){
         if(_attacking){
-            Hitbox attack_hitbox = Hitbox(_pos.x(),_pos.y(), 16, 16);
+            Hitbox attack_hitbox = Hitbox(_pos.x(),_pos.y(), 20, 20);
             if(_sprite.horizontal_flip()){
                 attack_hitbox.set_x(_pos.x() - 8);
             } else {
@@ -201,6 +201,26 @@ namespace fe
             }
         }
         
+    }
+
+    void Player::collide_with_enemies(){
+        Hitbox damage_hitbox = Hitbox(_pos.x(),_pos.y()+2, 8, 8);
+        if(!_invulnerable){
+            for(int i = 0; i < _enemies->size(); i++)
+            {
+                if(_enemies->at(i).is_hit(damage_hitbox))
+                {
+                    _invulnerable = true;
+                    _healthbar.set_hp(_healthbar.hp() - 1);
+                    _dy -= 0.3;
+                    if(_sprite.horizontal_flip()){
+                        _dx += 5;
+                    } else {
+                        _dx -= 5;
+                    }
+                }
+            }
+        }
     }
 
     void Player::collide_with_objects(bn::affine_bg_ptr map, fe::Level level){
@@ -226,7 +246,7 @@ namespace fe
                 _wall_running = false;
                 _falling = false;
                 _dy = 0;
-                _pos.set_y(_pos.y() - modulo(_pos.y() + 8,16));
+                _pos.set_y(_pos.y() - modulo(_pos.y(),8));
                 //todo if they pressed jump a few milliseconds before hitting the ground then jump now
             }
         } 
@@ -403,6 +423,24 @@ namespace fe
 
         // collide
         collide_with_objects(map, level);
+
+        // collide with enemies
+        collide_with_enemies();
+        
+        // ouch
+        if(_invulnerable){
+            ++_inv_timer;
+            if(modulo(_inv_timer/5, 2) == 0){
+                _sprite.set_visible(true);
+            } else {
+                _sprite.set_visible(false);
+            }
+            if(_inv_timer > 120){
+                _invulnerable = false;
+                _inv_timer = 0;
+                _sprite.set_visible(true);
+            }
+        }
 
         // update position
         _pos.set_x(_pos.x() + _dx);

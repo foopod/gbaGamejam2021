@@ -16,17 +16,11 @@ namespace fe
             bn::sprite_items::healthbar.create_sprite(x + inc, y, 1),
             bn::sprite_items::healthbar.create_sprite(x + inc *2, y, 2),
             bn::sprite_items::healthbar.create_sprite(x + inc *3, y, 3),
-            bn::sprite_items::healthbar.create_sprite(x + inc *4, y, 4),
-            bn::sprite_items::healthbar.create_sprite(x + inc *5, y, 5),
-            bn::sprite_items::healthbar.create_sprite(x + inc *6, y, 6),
-            bn::sprite_items::healthbar.create_sprite(x + inc *7, y, 7),
-            bn::sprite_items::healthbar.create_sprite(x + inc *8, y, 8),
-            bn::sprite_items::healthbar.create_sprite(x + inc *9, y, 9),
-            bn::sprite_items::healthbar.create_sprite(x + inc *10, y, 10)
+            bn::sprite_items::healthbar.create_sprite(x + inc *4, y, 12),
         })
     {
         _hp = 9;
-        for(int i = 0; i < 11; ++i){
+        for(int i = 0; i < 5; ++i){
             _sprites[i].set_bg_priority(0);
         }
     }
@@ -37,18 +31,13 @@ namespace fe
 
     void Healthbar::set_hp(int hp){
         _hp = hp;
-        for(int i = 0; i < 9; ++i){
-            if(i < hp){
-                _sprites[i+1].set_visible(true);
-            } else{
-                _sprites[i+1].set_visible(false);
-            }
-        }
-        _sprites[10].set_x(x + inc*(hp+1));
+        _sprites[3].set_item(bn::sprite_items::healthbar, 12-hp);
     }
 
     void Healthbar::set_visible(bool is_visible){
-        _is_visible = is_visible;
+        for(int i = 0; i < 5; ++i){
+            _sprites[i].set_visible(is_visible);
+        }
     }
 
 }

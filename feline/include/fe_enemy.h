@@ -43,7 +43,8 @@ namespace fe
             Level _level;
 
             bool _take_damage(int damage);
-            bool _will_fall_or_hit_wall();
+            bool _will_hit_wall();
+            bool _will_fall();
 
         public:
             Enemy(int x, int y, bn::camera_ptr camera, bn::affine_bg_ptr map, ENEMY_TYPE type, int hp);

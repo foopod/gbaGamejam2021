@@ -17,10 +17,10 @@
 namespace fe
 {
 
-    NPC::NPC(bn::fixed_point pos, bn::camera_ptr camera, NPC_TYPE type, bn::sprite_text_generator& text_generator) :
-        _pos(pos), _camera(camera), _type(type), _text_generator(&text_generator)
+    NPC::NPC(bn::fixed_point pos, bn::camera_ptr& camera, NPC_TYPE type, bn::sprite_text_generator& text_generator) :
+        _pos(pos), _camera(camera), _type(type), _text_generator(text_generator)
     {
-        _text_generator->set_bg_priority(0);
+        _text_generator.set_bg_priority(0);
         
         if(_type == NPC_TYPE::GOLEM)
         {
@@ -42,14 +42,14 @@ namespace fe
         }
         _sprite.value().set_camera(_camera);
         _sprite.value().set_bg_priority(1);
-        
+        _sprite.value().set_z_order(2);
     }
     
     void NPC::update(){
         _action.value().update();
         if(_is_talking){
             if(_currentChar == _lines.at(_currentLine).size() * 2){
-                if(bn::keypad::a_pressed())
+                if(bn::keypad::up_pressed() || bn::keypad::a_pressed())
                 {
                     if(_currentLine == _lines.size()-1)
                     {
@@ -66,13 +66,13 @@ namespace fe
                 _currentChars = _lines.at(_currentLine).substr(0,(_currentChar/2)+1);
                 ++_currentChar;
             }
-            _text_generator->set_left_alignment();
+            _text_generator.set_left_alignment();
             _text_sprites.clear();
-            _text_generator->generate(-110, _text_y_limit, _currentChars, _text_sprites);
+            _text_generator.generate(-110, _text_y_limit, _currentChars, _text_sprites);
         } else if(_is_near_player && !_finished) {
-            _text_generator->set_center_alignment();
+            _text_generator.set_center_alignment();
             _text_sprites.clear();
-            _text_generator->generate(0, _text_y_limit, "'a' to interact", _text_sprites);
+            _text_generator.generate(0, _text_y_limit, "press 'up' to interact", _text_sprites);
         } else {
             _text_sprites.clear();
         }
@@ -80,8 +80,8 @@ namespace fe
 
     bool NPC::check_trigger(bn::fixed_point pos){
         if(!_finished){
-            if(bn::abs(_pos.x() - pos.x()) < 30){
-                if(bn::abs(_pos.y() - pos.y()) < 30){
+            if(bn::abs(_pos.x() - pos.x()) < 90){
+                if(bn::abs(_pos.y() - pos.y()) < 90){
                     _is_near_player = true;
                     return true;
                 }

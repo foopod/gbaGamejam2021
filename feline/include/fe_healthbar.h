@@ -8,7 +8,7 @@ namespace fe
     class Healthbar
     {
         private:
-            bn::sprite_ptr _sprites[11];
+            bn::sprite_ptr _sprites[5];
             int _hp;
             bool _is_visible;
 
