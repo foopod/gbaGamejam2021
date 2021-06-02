@@ -6,8 +6,9 @@ namespace fe
     class Data
     {
         public:
-            bool learned_attack = false;
-            bool learned_wallrun = false;
+            Data();
+            bool learned_attack;
+            bool learned_wallrun;
     };
 }
 

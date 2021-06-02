@@ -48,6 +48,8 @@ namespace fe
             bool _invulnerable = false;
             int _inv_timer = 0;
 
+            Data _data;
+
             bn::span<const bn::affine_bg_map_cell> _map_cells;
             bn::affine_bg_ptr _map;
             bn::vector<Enemy,32>* _enemies;
@@ -64,7 +66,8 @@ namespace fe
         public:
             Player(bn::sprite_ptr sprite);
 
-            Data data;
+            
+            Data data();
             
             [[nodiscard]] bn::fixed_point pos();
 

@@ -87,7 +87,8 @@ namespace fe
         _map(bn::affine_bg_items::house.create_bg(0, 0)),
         _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),
         _text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0)),
-        _healthbar(fe::Healthbar())
+        _healthbar(fe::Healthbar()),
+        _data(fe::Data())
     {
         _map.set_visible(false); // why can't I leave something uninitialised
         _sprite.put_above();
@@ -361,7 +362,7 @@ namespace fe
     }
 
     void Player::update_position(bn::affine_bg_ptr map, fe::Level level){
-        _update_camera(10);
+        _update_camera(30 - bn::abs(_dx.integer())*5);
 
         // apply friction
         _dx = _dx * friction;

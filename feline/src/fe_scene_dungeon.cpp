@@ -5,6 +5,8 @@
 #include "bn_log.h"
 #include "bn_string.h"
 #include "bn_keypad.h"
+#include "bn_bg_palettes.h"
+#include "bn_sprite_palettes.h"
 #include "bn_fixed_point.h"
 #include "bn_sprite_ptr.h"
 #include "bn_camera_ptr.h"
@@ -57,6 +59,7 @@ namespace fe
         map_bg.set_priority(2);
         map.set_priority(1);
         vines.set_priority(0);
+
         Level level = Level(map);
 
         // map.set_horizontal_scale(2);
@@ -150,8 +153,8 @@ namespace fe
             //door
             if(bn::keypad::up_pressed() && !player.is_listening())
             {
-                if(player.pos().x() < 120 && player.pos().x() > 100){
-                    if(player.pos().y() < 960 && player.pos().y() > 920){
+                if(player.pos().x() < 160 && player.pos().x() > 140){
+                    if(player.pos().y() < 200 && player.pos().y() > 188){
                         return Scene::DUNGEON_SKY;
                     }
                 }
