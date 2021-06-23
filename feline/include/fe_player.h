@@ -52,7 +52,7 @@ namespace fe
 
             bn::span<const bn::affine_bg_map_cell> _map_cells;
             bn::affine_bg_ptr _map;
-            bn::vector<Enemy,32>* _enemies;
+            bn::vector<Enemy,16>* _enemies;
 
             fe::Hitbox _hitbox_fall = Hitbox(0,8,8,0);
             fe::Hitbox _hitbox_left = Hitbox(-4,0,4,8);
@@ -84,7 +84,7 @@ namespace fe
             void apply_animation_state();
             void update_position(bn::affine_bg_ptr map, fe::Level level);
 
-            void spawn(bn::fixed_point pos, bn::camera_ptr camera, bn::affine_bg_ptr map, bn::vector<Enemy,32>& enemies);
+            void spawn(bn::fixed_point pos, bn::camera_ptr camera, bn::affine_bg_ptr map, bn::vector<Enemy,16>& enemies);
             void reset();
 
             bool is_right();

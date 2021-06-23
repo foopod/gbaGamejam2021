@@ -101,7 +101,7 @@ namespace fe
         _text_bg2.put_above();
     }
 
-    void Player::spawn(bn::fixed_point pos, bn::camera_ptr camera, bn::affine_bg_ptr map, bn::vector<Enemy,32>& enemies){
+    void Player::spawn(bn::fixed_point pos, bn::camera_ptr camera, bn::affine_bg_ptr map, bn::vector<Enemy,16>& enemies){
         _pos = pos;
         _camera = camera;
         _map = map;

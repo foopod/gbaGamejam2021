@@ -53,12 +53,12 @@ namespace fe
         // bn::music_items::house.play();
         
         // map
-        bn::regular_bg_ptr map_bg = bn::regular_bg_items::dungeon_bg.create_bg(512, 512);
         bn::affine_bg_ptr map = bn::affine_bg_items::dungeon_2x.create_bg(512, 512);
-        bn::regular_bg_ptr vines = bn::regular_bg_items::vines.create_bg(0, 0);
+        bn::regular_bg_ptr map_bg = bn::regular_bg_items::dungeon_bg.create_bg(512, 512);
+        bn::optional<bn::regular_bg_ptr> vines = bn::regular_bg_items::vines.create_bg(0, 0);
         map_bg.set_priority(2);
         map.set_priority(1);
-        vines.set_priority(0);
+        vines.value().set_priority(0);
 
         Level level = Level(map);
 
@@ -67,18 +67,21 @@ namespace fe
 
         map.set_camera(camera);
         map_bg.set_camera(camera);
-        vines.set_camera(camera);
+        vines.value().set_camera(camera);
 
         // bn::fixed max_cpu_usage;
         // int counter = 1;
 
         //Enemies
-        bn::vector<Enemy, 32> enemies = {};
-        enemies.push_back(Enemy(315, 168, camera, map, ENEMY_TYPE::SLIME, 2));
+        bn::vector<Enemy, 16> enemies = {};
+        enemies.push_back(Enemy(290, 169, camera, map, ENEMY_TYPE::SLIME, 2));
         enemies.push_back(Enemy(434, 150, camera, map, ENEMY_TYPE::BAT, 1));
         enemies.push_back(Enemy(750, 480, camera, map, ENEMY_TYPE::SLIME, 2));
         enemies.push_back(Enemy(711, 224, camera, map, ENEMY_TYPE::SLIME, 2));
         enemies.push_back(Enemy(710, 348, camera, map, ENEMY_TYPE::BAT, 1));
+        enemies.push_back(Enemy(412, 440, camera, map, ENEMY_TYPE::SLIME, 2));
+        enemies.push_back(Enemy(922, 720, camera, map, ENEMY_TYPE::BAT, 1));
+        enemies.push_back(Enemy(337, 792, camera, map, ENEMY_TYPE::SLIME, 2));
 
         //player
         player.spawn(spawn_location, camera, map, enemies);
@@ -91,9 +94,11 @@ namespace fe
         Tooltip explain_attack = Tooltip(bn::fixed_point(243, 160),"Press 'B' to Attack", text_generator);
         Tooltip explain_wallrun = Tooltip(bn::fixed_point(454, 256),"Hold 'Up' to Wallrun", text_generator);
 
-        StorySave first_plaque = StorySave(bn::fixed_point(323, 232), STORY_TYPE::BEGINNING, camera, text_generator);
-        StorySave second_plaque = StorySave(bn::fixed_point(913, 488), STORY_TYPE::BEGINNING, camera, text_generator);
-        StorySave third_plaque = StorySave(bn::fixed_point(746, 592), STORY_TYPE::BEGINNING, camera, text_generator);
+        bn::vector<StorySave, 4> saves = {};
+        saves.push_back(StorySave(bn::fixed_point(323, 232), STORY_TYPE::FIRST, camera, text_generator));
+        saves.push_back(StorySave(bn::fixed_point(913, 488), STORY_TYPE::SECOND, camera, text_generator));
+        saves.push_back(StorySave(bn::fixed_point(746, 592), STORY_TYPE::THIRD, camera, text_generator));
+        saves.push_back(StorySave(bn::fixed_point(210, 840), STORY_TYPE::CRACKED, camera, text_generator));
         // int index = 1;
 
         while(true)
@@ -107,7 +112,7 @@ namespace fe
             //     max_cpu_usage = 0;
             //     counter = 60;
             // }
-            // 
+            
 
             if(golem.check_trigger(player.pos()))
             {
@@ -120,23 +125,33 @@ namespace fe
             }
             else if(explain_attack.check_trigger(player.pos())){
                 player.set_listening(true);
+                explain_attack.update();
             }
             else if(explain_wallrun.check_trigger(player.pos())){
                 player.set_listening(true);
+                explain_wallrun.update();
             }
             else {
                 player.set_listening(false);
             }
 
-            first_plaque.update();
-            second_plaque.update();
-            third_plaque.update();
+            for(StorySave& save : saves){
+                
+                if(save.check_trigger(player.pos()) && bn::keypad::up_pressed()){
+                    vines.reset();
+                    save.execute_scene();
+                    vines = bn::regular_bg_items::vines.create_bg(0, 0);
+                    vines.value().set_priority(0);
+                    vines.value().set_camera(camera);
+                }
+                if(bn::abs(save.pos().x() - camera.x()) < 200 && bn::abs(save.pos().y() - camera.y()) < 100){
+                    save.update();
+                }
+            }
             golem.update();
-            explain_attack.update();
-            explain_wallrun.update();
 
             for(Enemy& enemy : enemies){
-                if(bn::abs(enemy.pos().x() - camera.x()) < 240 && bn::abs(enemy.pos().y() - camera.y()) < 160){
+                if(bn::abs(enemy.pos().x() - camera.x()) < 200 && bn::abs(enemy.pos().y() - camera.y()) < 100){
                     enemy.update();
                 } else {
                     enemy.set_visible(false);
@@ -146,9 +161,8 @@ namespace fe
             player.update_position(map,level);
             player.apply_animation_state();
 
-            vines.set_position(bn::fixed_point((player.pos().x()-500)/10,(player.pos().y())/10));
-            // BN_LOG(player.pos().x());
-            // BN_LOG(player.pos().y());
+            //  BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
+            vines.value().set_position(bn::fixed_point((player.pos().x()-500)/10,(player.pos().y())/10));
 
             //door
             if(bn::keypad::up_pressed() && !player.is_listening())
@@ -160,6 +174,8 @@ namespace fe
                 }
 
             }
+            
+            
             // BN_PROFILER_RESET();
             bn::core::update();
             // bn::profiler::show();

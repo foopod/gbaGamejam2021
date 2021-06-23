@@ -5,7 +5,10 @@ namespace fe
 {
     enum class STORY_TYPE
     {
-        BEGINNING
+        FIRST,
+        SECOND,
+        THIRD,
+        CRACKED
     };
 }
 

@@ -89,6 +89,7 @@ namespace fe
             _action = bn::create_sprite_animate_action_forever(
                              _sprite.value(), 20, bn::sprite_items::slime_sprite.tiles_item(), 0,1,0,1);
         }
+        _sprite.value().set_visible(true);
     }
 
     void Enemy::set_visible(bool visiblity){
@@ -143,20 +144,11 @@ namespace fe
     bool Enemy::_will_hit_wall()
     {   
         
-        if(_dx < 0){ // left
-            if(!_check_collisions_map(_pos, Hitbox(-4,8,4,8), directions::down, _map, _level, _map_cells)){
-                return true;
-            }
-            if(_check_collisions_map(_pos, Hitbox(-4, 4, 8, 8), directions::right, _map, _level, _map_cells)){
-                return true;
-            }
-        } else { //right
-            if(!_check_collisions_map(_pos, Hitbox(4,8,4,8), directions::down, _map, _level, _map_cells)){
-                return true;
-            }
-            if(_check_collisions_map(_pos, Hitbox(4, 4, 8, 8), directions::right, _map, _level, _map_cells)){
-                return true;
-            }
+        if(_check_collisions_map(_pos, Hitbox(-4, 0, 12, 12), directions::left, _map, _level, _map_cells)){
+            return true;
+        }
+        if(_check_collisions_map(_pos, Hitbox(10, 0, 12, 12), directions::right, _map, _level, _map_cells)){
+            return true;
         }
         return false;
     }
@@ -190,7 +182,7 @@ namespace fe
                 _sprite.value().set_visible(true);
             }
 
-            //dead check
+            // dead check
             if(_action.value().done()){
                 _sprite.value().set_visible(false);
                 _dead = true;
@@ -204,12 +196,6 @@ namespace fe
                 }
             }
 
-            if(_direction_timer > 200){
-                // do nothing
-            } else{
-                ++_direction_timer;
-            }
-
             //apply gravity
             if(_type != ENEMY_TYPE::BAT)
             {
@@ -217,18 +203,21 @@ namespace fe
             }
 
             if(_type == ENEMY_TYPE::SLIME){
-                if(!_invulnerable && _grounded && _direction_timer > 60){
+                if(!_invulnerable && _grounded && _direction_timer > 30){
                     if(_will_fall() || _will_hit_wall()){
+                        
                         _dx = 0;
                         _dir = -_dir;
                         _direction_timer = 0;
                         _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
                     }
-                } 
+                }
                 if((_action.value().current_index() == 1 || _action.value().current_index() == 3)  && !_invulnerable && _grounded){
                     _dx += _dir*acc;
                 }
-            } else if(_type == ENEMY_TYPE::BAT){
+            } 
+            else 
+            if(_type == ENEMY_TYPE::BAT){
                 if(_direction_timer > 60){
                     if(_will_hit_wall()){
                         _dx = 0;
@@ -244,6 +233,7 @@ namespace fe
             
             _dx = _dx * friction;
 
+            //fall
             if(_dy > 0){
                 if(_check_collisions_map(_pos, Hitbox(0,8,8,0), directions::down, _map, _level, _map_cells)){
                     _dy = 0;
@@ -255,11 +245,11 @@ namespace fe
                 }
             }
 
+            //bounce?
             if(bn::abs(_dx) > 0){
-                if(_check_collisions_map(_pos, Hitbox(0, 0, 4, 8), directions::left, _map, _level, _map_cells) ||
-                _check_collisions_map(_pos, Hitbox(0, 0, 4, 8), directions::left, _map, _level, _map_cells)){
+                if(_check_collisions_map(_pos, Hitbox(0, 0, 4, 8), directions::left, _map, _level, _map_cells)){
                     _dx = -_dx;
-                    _direction_timer = 0;
+                    // _direction_timer = 0;
                 }
             }
 
@@ -274,7 +264,11 @@ namespace fe
             _sprite.value().set_position(_pos);
             if(!_action.value().done()){
                 _action.value().update();
-            }        
+            }     
+
+            if(_direction_timer < 121){
+               _direction_timer+=1;
+            }   
         }
     }
 }

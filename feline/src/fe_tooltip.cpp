@@ -30,16 +30,16 @@ namespace fe
                     _is_talking = false;
                     _finished = true;
                     _currentChar = 0;
+                    _text_sprites.clear();
                 }
             } else {
                 _currentChars = _line.substr(0,(_currentChar)+1);
                 ++_currentChar;
+                _text_sprites.clear();
+                _text_generator.generate(-110, _text_y_limit, _currentChars, _text_sprites);
             }
-            _text_sprites.clear();
-            _text_generator.generate(-110, _text_y_limit, _currentChars, _text_sprites);
-        } else {
-            _text_sprites.clear();
-        }
+            
+        } 
     }
 
     bool Tooltip::check_trigger(bn::fixed_point player_pos){

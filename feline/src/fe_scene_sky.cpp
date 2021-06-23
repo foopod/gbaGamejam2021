@@ -52,7 +52,7 @@ namespace fe
         // bn::fixed max_cpu_usage;
         // int counter = 1;
 
-        bn::vector<Enemy, 32> enemies = {};
+        bn::vector<Enemy, 16> enemies = {};
 
         // player
         player.spawn(spawn_location, camera, map, enemies);
