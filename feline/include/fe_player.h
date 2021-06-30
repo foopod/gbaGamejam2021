@@ -59,7 +59,7 @@ namespace fe
             fe::Hitbox _hitbox_right = Hitbox(4,0,4,8);
             fe::Hitbox _hitbox_jump = Hitbox(0,4,8,4);
             bn::sprite_animate_action<10> _action = bn::create_sprite_animate_action_forever(
-                        _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 0,1,0,1,0,1,0,1,0,1);
+                        _sprite, 30, bn::sprite_items::cat_sprite.tiles_item(), 0,1,0,1,0,1,0,1,0,1);
             void _update_camera(int lerp);
             
 

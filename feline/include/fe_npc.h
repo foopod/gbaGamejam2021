@@ -56,7 +56,7 @@ namespace fe
                 "I don't know if they came passed me.",
                 "I haven't awoken for many centuries now.",
                 "You see..",
-                "*they motion toward the sprawling cobwebs*"
+                "*they motion toward the sprawling vines*"
             };
 
             bn::string_view _tortoise_lines[12] = {
@@ -75,10 +75,9 @@ namespace fe
             };
 
             bn::string_view _penguin_lines[4] = {
-                "Oh to fly..",
-                "To soar through the sky",
-                "There is nothing I want to do more",
-                ". . ."
+                "Hurry!",
+                "I saw them head down.",
+                "They were heading for the caves!",
             };
 
         public:

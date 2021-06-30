@@ -26,7 +26,7 @@
 //assets
 #include "bn_sprite_items_cat_sprite.h"
 #include "bn_sprite_items_box.h"
-#include "bn_affine_bg_items_house.h"
+#include "bn_affine_bg_items_house_2x.h"
 #include "bn_regular_bg_items_house_bg.h"
 
 #include "bn_sprite_text_generator.h"
@@ -41,18 +41,15 @@ namespace fe
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
         //NPC
-        NPC tortoise = NPC(bn::fixed_point(535, 304), camera, NPC_TYPE::TORTOISE, text_generator);
+        NPC tortoise = NPC(bn::fixed_point(380, 376), camera, NPC_TYPE::TORTOISE, text_generator);
         // Tooltip explain_attack = Tooltip(bn::fixed_point(440, 304),"Press 'B' to Attack", text_generator);
 
         // map
         bn::regular_bg_ptr map_bg = bn::regular_bg_items::house_bg.create_bg(512, 512);
-        bn::affine_bg_ptr map = bn::affine_bg_items::house.create_bg(512, 512);
+        bn::affine_bg_ptr map = bn::affine_bg_items::house_2x.create_bg(512, 512);
         map_bg.set_priority(2);
         map.set_priority(1);
         fe::Level level = fe::Level(map);
-        map.set_horizontal_scale(2);
-        map.set_vertical_scale(2);
-
         // camera
         map.set_camera(camera);
         map_bg.set_camera(camera);
@@ -77,7 +74,7 @@ namespace fe
 
             if(tortoise.check_trigger(player.pos()))
             {
-                if(bn::keypad::a_pressed()){
+                if(bn::keypad::up_pressed()){
                     player.set_listening(true);
                     tortoise.talk();
                 }else if(!tortoise.is_talking()){
@@ -100,8 +97,8 @@ namespace fe
             
             if(bn::keypad::up_pressed())
             {
-                if(player.pos().x() < 720 && player.pos().x() > 700){
-                    if(player.pos().y() < 320 && player.pos().y() > 280){
+                if(player.pos().x() < 570 && player.pos().x() > 540){
+                    if(player.pos().y() < 400 && player.pos().y() > 360){
                         return Scene::HOUSE_SKY;
                     }
                 }

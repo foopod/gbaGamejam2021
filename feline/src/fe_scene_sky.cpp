@@ -24,7 +24,8 @@
 
 //assets
 #include "bn_sprite_items_cat_sprite.h"
-#include "bn_affine_bg_items_map.h"
+#include "bn_affine_bg_items_cliffs.h"
+#include "bn_regular_bg_items_cliffs_bg.h"
 
 #include "bn_sprite_text_generator.h"
 #include "variable_8x8_sprite_font.h"
@@ -38,15 +39,17 @@ namespace fe
         bn::sprite_text_generator text_generator(variable_8x8_sprite_font);
 
         //NPC
-        NPC penguin = NPC(bn::fixed_point(850, 984), camera, NPC_TYPE::PENGUIN, text_generator);
+        NPC penguin = NPC(bn::fixed_point(231, 312), camera, NPC_TYPE::PENGUIN, text_generator);
 
         // map
-        bn::affine_bg_ptr map = bn::affine_bg_items::map.create_bg(512, 512);
+        bn::affine_bg_ptr map = bn::affine_bg_items::cliffs.create_bg(512, 512);
+        bn::regular_bg_ptr map_bg = bn::regular_bg_items::cliffs_bg.create_bg(512, 512);
+        map_bg.set_priority(2);
+        map.set_priority(1);
         fe::Level level = fe::Level(map);
-        map.set_horizontal_scale(2);
-        map.set_vertical_scale(2);
 
         // camera
+        map_bg.set_camera(camera);
         map.set_camera(camera);
         
         // bn::fixed max_cpu_usage;
@@ -70,7 +73,7 @@ namespace fe
 
             if(penguin.check_trigger(player.pos()))
             {
-                if(bn::keypad::a_pressed()){
+                if(bn::keypad::up_pressed()){
                     player.set_listening(true);
                     penguin.talk();
                 }else if(!penguin.is_talking()){
@@ -79,20 +82,22 @@ namespace fe
             }
             penguin.update();
 
+            map_bg.set_x(map_bg.x() + 0.3);
+
             player.update_position(map, level);
             player.apply_animation_state();
             // BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
             
             if(bn::keypad::up_pressed())
             {
-                if(player.pos().x() < 80 && player.pos().x() > 50){
-                    if(player.pos().y() < 980 && player.pos().y() > 920){
+                if(player.pos().x() < 185 && player.pos().x() > 155){
+                    if(player.pos().y() < 580 && player.pos().y() > 550){
                         return Scene::SKY_DUNGEON;
                     }
                 }
 
-                if(player.pos().x() < 220 && player.pos().x() > 200){
-                    if(player.pos().y() < 730 && player.pos().y() > 720){
+                if(player.pos().x() < 170 && player.pos().x() > 140){
+                    if(player.pos().y() < 230 && player.pos().y() > 200){
                         return Scene::SKY_HOUSE;
                     }
                 }

@@ -92,13 +92,18 @@ namespace fe
     {
         _map.set_visible(false); // why can't I leave something uninitialised
         _sprite.put_above();
+        _sprite.set_visible(false);
+
+        _healthbar.set_visible(false);
 
         _text_bg1.set_scale(2);
         _text_bg1.set_bg_priority(0);
         _text_bg1.put_above();
+        _text_bg1.set_visible(false);
         _text_bg2.set_scale(2);
         _text_bg2.set_bg_priority(0);
         _text_bg2.put_above();
+        _text_bg2.set_visible(false);
     }
 
     void Player::spawn(bn::fixed_point pos, bn::camera_ptr camera, bn::affine_bg_ptr map, bn::vector<Enemy,16>& enemies){
@@ -117,6 +122,7 @@ namespace fe
         _sprite.set_camera(_camera);
         _sprite.set_bg_priority(1);
         _sprite.put_above();
+        _healthbar.set_visible(true);
         _text_bg1.set_camera(_camera);
         _text_bg2.set_camera(_camera);
         _update_camera(1);

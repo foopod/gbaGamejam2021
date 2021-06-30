@@ -6,7 +6,8 @@ namespace fe
     enum class ENEMY_TYPE
     {
         BAT,
-        SLIME
+        SLIME,
+        BOSS
     };
 }
 

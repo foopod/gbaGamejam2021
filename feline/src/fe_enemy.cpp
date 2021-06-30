@@ -10,6 +10,7 @@
 #include "bn_keypad.h"
 #include "bn_sprite_items_bat_sprite.h"
 #include "bn_sprite_items_slime_sprite.h"
+#include "bn_sprite_items_child.h"
 #include "bn_affine_bg_map_ptr.h"
 
 
@@ -89,6 +90,13 @@ namespace fe
             _action = bn::create_sprite_animate_action_forever(
                              _sprite.value(), 20, bn::sprite_items::slime_sprite.tiles_item(), 0,1,0,1);
         }
+         else if (_type == ENEMY_TYPE::BOSS){
+            _sprite = bn::sprite_items::child.create_sprite(_pos.x(), _pos.y());
+            _sprite.value().set_camera(_camera);
+            _sprite.value().set_bg_priority(1);
+            _action = bn::create_sprite_animate_action_forever(
+                             _sprite.value(), 20, bn::sprite_items::child.tiles_item(), 0,1,2,3);
+        }
         _sprite.value().set_visible(true);
     }
 
@@ -97,15 +105,29 @@ namespace fe
     }
 
     bool Enemy::damage_from_left(int damage){
-        _dy-=0.4;
-        _dx-=1;
+        if(_type == ENEMY_TYPE::BOSS){
+            _dy-=0.2;
+            _dx-=0.5;
+        } else {
+            _dy-=0.4;
+            _dx-=1;
+        }
+        _dir = 1;
+        _direction_timer = 0;
         _grounded = false;
         return _take_damage(damage);
     }
 
     bool Enemy::damage_from_right(int damage){
-        _dy-=0.4;
-        _dx+=1;
+        if(_type == ENEMY_TYPE::BOSS){
+            _dy-=0.2;
+            _dx+=0.5;
+        } else {
+            _dy-=0.4;
+            _dx+=1;
+        }
+        _dir = -1;
+        _direction_timer = 0;
         _grounded = false;
         return _take_damage(damage);
     }
@@ -124,6 +146,11 @@ namespace fe
                 {
                     _action = bn::create_sprite_animate_action_once(
                         _sprite.value(), 5, bn::sprite_items::bat_sprite.tiles_item(), 2,3,3,3);
+                } 
+                else if (_type == ENEMY_TYPE::BOSS)
+                {
+                    _action = bn::create_sprite_animate_action_once(
+                        _sprite.value(), 15, bn::sprite_items::child.tiles_item(), 4,5,6,7);
                 }
                 
                 return true;
@@ -135,7 +162,12 @@ namespace fe
     bool Enemy::is_hit(Hitbox attack)
     {
         if(!_dead){
-            return check_collisions_bb(attack, _pos.x(), _pos.y(), 8, 8);
+            if(_type == ENEMY_TYPE::BOSS){
+                return check_collisions_bb(attack, _pos.x(), _pos.y(), 8, 16);
+            } else {
+                return check_collisions_bb(attack, _pos.x(), _pos.y(), 8, 8);
+            }
+            
         } else {
             return false;
         }
@@ -202,19 +234,25 @@ namespace fe
                 _dy += gravity;
             }
 
-            if(_type == ENEMY_TYPE::SLIME){
+            if(_type == ENEMY_TYPE::SLIME || _type == ENEMY_TYPE::BOSS){
                 if(!_invulnerable && _grounded && _direction_timer > 30){
-                    if(_will_fall() || _will_hit_wall()){
-                        
+                    if((_will_fall() && _type != ENEMY_TYPE::BOSS) || _will_hit_wall()){
                         _dx = 0;
                         _dir = -_dir;
                         _direction_timer = 0;
                         _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
                     }
                 }
-                if((_action.value().current_index() == 1 || _action.value().current_index() == 3)  && !_invulnerable && _grounded){
-                    _dx += _dir*acc;
+                if(_type == ENEMY_TYPE::SLIME){
+                    if((_action.value().current_index() == 1 || _action.value().current_index() == 3)  && !_invulnerable && _grounded){
+                        _dx += _dir*acc;
+                    }
+                } else {
+                    if(!_invulnerable && _grounded){
+                        _dx += _dir*acc/2;
+                    }
                 }
+                
             } 
             else 
             if(_type == ENEMY_TYPE::BAT){
@@ -232,17 +270,34 @@ namespace fe
             }
             
             _dx = _dx * friction;
+            if(_dx > 0){
+                _sprite.value().set_horizontal_flip(false);
+            } else {
+                _sprite.value().set_horizontal_flip(true);
+            }
 
             //fall
             if(_dy > 0){
-                if(_check_collisions_map(_pos, Hitbox(0,8,8,0), directions::down, _map, _level, _map_cells)){
-                    _dy = 0;
-                    // BN_LOG(bn::to_string<32>(_pos.x())+" " + bn::to_string<32>(_pos.y()));
-                    _pos.set_y(_pos.y() - modulo(_pos.y(),8));
-                    _grounded = true;
-                } else {
-                    _grounded = false;
+                if(_type == ENEMY_TYPE::BOSS){
+                    if(_check_collisions_map(_pos, Hitbox(0,16,8,0), directions::down, _map, _level, _map_cells)){
+                        _dy = 0;
+                        // BN_LOG(bn::to_string<32>(_pos.x())+" " + bn::to_string<32>(_pos.y()));
+                        _pos.set_y(_pos.y() - modulo(_pos.y(),8));
+                        _grounded = true;
+                    } else {
+                        _grounded = false;
+                    }
+                } else{
+                    if(_check_collisions_map(_pos, Hitbox(0,8,8,0), directions::down, _map, _level, _map_cells)){
+                        _dy = 0;
+                        // BN_LOG(bn::to_string<32>(_pos.x())+" " + bn::to_string<32>(_pos.y()));
+                        _pos.set_y(_pos.y() - modulo(_pos.y(),8));
+                        _grounded = true;
+                    } else {
+                        _grounded = false;
+                    }
                 }
+                
             }
 
             //bounce?
@@ -258,10 +313,12 @@ namespace fe
                 _dy = max_dy;
             }
 
-            _pos.set_x(_pos.x() + _dx);
-            _pos.set_y(_pos.y() + _dy);
-
-            _sprite.value().set_position(_pos);
+            if(_hp >= 0){
+                _pos.set_x(_pos.x() + _dx);
+                _pos.set_y(_pos.y() + _dy);
+                _sprite.value().set_position(_pos);
+            }
+            
             if(!_action.value().done()){
                 _action.value().update();
             }     

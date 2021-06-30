@@ -37,7 +37,7 @@ namespace fe
         } else if(_type == NPC_TYPE::PENGUIN){
             _sprite = bn::sprite_items::penguin_sprite.create_sprite(_pos.x(), _pos.y());
             _action = bn::create_sprite_animate_action_forever(
-                            _sprite.value(), 60, bn::sprite_items::penguin_sprite.tiles_item(), 0,1);
+                            _sprite.value(), 20, bn::sprite_items::penguin_sprite.tiles_item(), 0,1);
             _lines = bn::span(_penguin_lines);
         }
         _sprite.value().set_camera(_camera);
@@ -61,8 +61,19 @@ namespace fe
                         _currentLine += 1;
                         _currentChar = 0;
                     }
+                } else if(bn::keypad::start_pressed()){
+                    _is_talking = false;
+                    _currentChars = "";
+                    _currentChar = 0;
+                    _currentLine = 0;
                 }
             } else {
+                if(bn::keypad::start_pressed()){
+                    _is_talking = false;
+                    _currentChars = "";
+                    _currentChar = 0;
+                    _currentLine = 0;
+                }
                 _currentChars = _lines.at(_currentLine).substr(0,(_currentChar/2)+1);
                 ++_currentChar;
             }
@@ -80,8 +91,8 @@ namespace fe
 
     bool NPC::check_trigger(bn::fixed_point pos){
         if(!_finished){
-            if(bn::abs(_pos.x() - pos.x()) < 90){
-                if(bn::abs(_pos.y() - pos.y()) < 90){
+            if(bn::abs(_pos.x() - pos.x()) < 50){
+                if(bn::abs(_pos.y() - pos.y()) < 50){
                     _is_near_player = true;
                     return true;
                 }

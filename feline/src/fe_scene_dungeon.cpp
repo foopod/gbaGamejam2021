@@ -82,6 +82,7 @@ namespace fe
         enemies.push_back(Enemy(412, 440, camera, map, ENEMY_TYPE::SLIME, 2));
         enemies.push_back(Enemy(922, 720, camera, map, ENEMY_TYPE::BAT, 1));
         enemies.push_back(Enemy(337, 792, camera, map, ENEMY_TYPE::SLIME, 2));
+        enemies.push_back(Enemy(885, 936, camera, map, ENEMY_TYPE::BOSS, 10));
 
         //player
         player.spawn(spawn_location, camera, map, enemies);
