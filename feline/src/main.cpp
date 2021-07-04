@@ -22,10 +22,13 @@
 
 #include "fe_hitbox.h"
 #include "fe_scene_dungeon.h"
+#include "fe_scene_dungeon_return.h"
 #include "fe_scene_sky.h"
+#include "fe_scene_other.h"
 #include "fe_scene_house.h"
 #include "fe_scene_loading.h"
 #include "fe_scene_title.h"
+#include "fe_scene_end.h"
 #include "fe_scene.h"
 
 #include "bn_sprite_items_cat_sprite.h"
@@ -69,9 +72,24 @@ int main()
             fe::Title title = fe::Title();
             scene = title.execute();
         }
+        else if(scene == fe::Scene::END)
+        {
+            fe::End end = fe::End();
+            scene = end.execute();
+        }
+        else if(scene == fe::Scene::OTHER)
+        {
+            fe::Other other = fe::Other();
+            scene = other.execute(player, bn::fixed_point(235, 590));
+        }
+        else if(scene == fe::Scene::OTHER_DUNGEON)
+        {
+            fe::DungeonReturn dungeon = fe::DungeonReturn();
+            scene = dungeon.execute(player, bn::fixed_point(252, 848));
+        }
         cat_sprite.set_visible(false);
         fe::Loading loading = fe::Loading();
-        loading.execute();
+        loading.execute(scene);
         bn::core::update();
         
     }

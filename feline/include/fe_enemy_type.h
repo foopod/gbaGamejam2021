@@ -7,6 +7,7 @@ namespace fe
     {
         BAT,
         SLIME,
+        WALL,
         BOSS
     };
 }

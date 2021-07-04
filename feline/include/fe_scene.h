@@ -10,8 +10,11 @@ namespace fe
         SKY_HOUSE,
         SKY_DUNGEON,
         DUNGEON_SKY,
+        OTHER,
+        OTHER_DUNGEON,
         LOADING,
-        TITLE
+        TITLE,
+        END
     };
 }
 

@@ -11,6 +11,8 @@
 #include "bn_sprite_items_bat_sprite.h"
 #include "bn_sprite_items_slime_sprite.h"
 #include "bn_sprite_items_child.h"
+#include "bn_sprite_items_wall.h"
+#include "bn_sprite_items_box.h"
 #include "bn_affine_bg_map_ptr.h"
 
 
@@ -39,10 +41,12 @@ namespace fe
 
     [[nodiscard]] bool _check_collisions_map(bn::fixed_point pos, Hitbox hitbox, directions direction, bn::affine_bg_ptr& map, fe::Level level, bn::span<const bn::affine_bg_map_cell> cells)
     {
+        
         bn::fixed l = pos.x() - hitbox.width() / 2 + hitbox.x();
         bn::fixed r = pos.x() + hitbox.width() / 2 + hitbox.x();
         bn::fixed u = pos.y() - hitbox.height() / 2 + hitbox.y();
         bn::fixed d = pos.y() + hitbox.height() / 2 + hitbox.y();
+        
         
         bn::vector<int, 32> tiles;
         if(direction == down){
@@ -70,11 +74,15 @@ namespace fe
     constexpr const bn::fixed max_dy = 6;
     constexpr const bn::fixed friction = 0.85;
 
+    int boss_tele_timer;
+
     Enemy::Enemy(int x, int y, bn::camera_ptr camera, bn::affine_bg_ptr map, ENEMY_TYPE type, int hp) :
         _pos(x, y), _camera(camera), _type(type), _hp(hp), _map(map), _level(Level(map))
     {
         _map_cells = map.map().cells_ref().value();
         _dir = 1;
+
+        boss_tele_timer = 0;
         
         if(_type == ENEMY_TYPE::BAT)
         {
@@ -90,14 +98,23 @@ namespace fe
             _action = bn::create_sprite_animate_action_forever(
                              _sprite.value(), 20, bn::sprite_items::slime_sprite.tiles_item(), 0,1,0,1);
         }
+         else if (_type == ENEMY_TYPE::WALL){
+            _sprite = bn::sprite_items::wall.create_sprite(_pos.x(), _pos.y());
+            _sprite.value().set_camera(_camera);
+            _sprite.value().set_bg_priority(1);
+            _action = bn::create_sprite_animate_action_forever(
+                             _sprite.value(), 20, bn::sprite_items::wall.tiles_item(), 0,1,0,1);
+        }
          else if (_type == ENEMY_TYPE::BOSS){
             _sprite = bn::sprite_items::child.create_sprite(_pos.x(), _pos.y());
             _sprite.value().set_camera(_camera);
             _sprite.value().set_bg_priority(1);
             _action = bn::create_sprite_animate_action_forever(
-                             _sprite.value(), 20, bn::sprite_items::child.tiles_item(), 0,1,2,3);
+                             _sprite.value(), 20, bn::sprite_items::child.tiles_item(), 1,2,3,4);
         }
         _sprite.value().set_visible(true);
+
+        
     }
 
     void Enemy::set_visible(bool visiblity){
@@ -107,8 +124,8 @@ namespace fe
     bool Enemy::damage_from_left(int damage){
         if(_type == ENEMY_TYPE::BOSS){
             _dy-=0.2;
-            _dx-=0.5;
-        } else {
+            _dx-=0.2;
+        } else if(_type != ENEMY_TYPE::WALL){
             _dy-=0.4;
             _dx-=1;
         }
@@ -121,8 +138,8 @@ namespace fe
     bool Enemy::damage_from_right(int damage){
         if(_type == ENEMY_TYPE::BOSS){
             _dy-=0.2;
-            _dx+=0.5;
-        } else {
+            _dx+=0.2;
+        } else if(_type != ENEMY_TYPE::WALL){
             _dy-=0.4;
             _dx+=1;
         }
@@ -150,7 +167,12 @@ namespace fe
                 else if (_type == ENEMY_TYPE::BOSS)
                 {
                     _action = bn::create_sprite_animate_action_once(
-                        _sprite.value(), 15, bn::sprite_items::child.tiles_item(), 4,5,6,7);
+                        _sprite.value(), 5, bn::sprite_items::child.tiles_item(), 5,6,7,8);
+                }
+                else if (_type == ENEMY_TYPE::WALL)
+                {
+                    _action = bn::create_sprite_animate_action_once(
+                        _sprite.value(), 5, bn::sprite_items::wall.tiles_item(), 2,2,3,3);
                 }
                 
                 return true;
@@ -185,16 +207,39 @@ namespace fe
         return false;
     }
 
+    bool Enemy::_fall_check(bn::fixed x, bn::fixed y)
+    {  
+        if(_check_collisions_map(bn::fixed_point(x, y), Hitbox(0,16,4,9), directions::down, _map, _level, _map_cells)){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
     bool Enemy::_will_fall(){
-        if(_dx < 0){ // left
-            if(!_check_collisions_map(_pos, Hitbox(-4,8,4,8), directions::down, _map, _level, _map_cells)){
-                return true;
+        if(_type == ENEMY_TYPE::BOSS){
+            if(_dx < 0){ // left
+                if(!_check_collisions_map(_pos, Hitbox(-4,16,4,8), directions::down, _map, _level, _map_cells)){
+                    return true;
+                }
+            } else { //right
+                if(!_check_collisions_map(_pos, Hitbox(4,16,4,8), directions::down, _map, _level, _map_cells)){
+                    return true;
+                }
             }
-        } else { //right
-            if(!_check_collisions_map(_pos, Hitbox(4,8,4,8), directions::down, _map, _level, _map_cells)){
-                return true;
+        } else {
+            if(_dx < 0){ // left
+                if(!_check_collisions_map(_pos, Hitbox(-4,8,4,8), directions::down, _map, _level, _map_cells)){
+                    return true;
+                }
+            } else { //right
+                if(!_check_collisions_map(_pos, Hitbox(4,8,4,8), directions::down, _map, _level, _map_cells)){
+                    return true;
+                }
             }
         }
+        
         return false;
     }
 
@@ -206,7 +251,11 @@ namespace fe
         return _hp;
     }
 
-    void Enemy::update(){
+    ENEMY_TYPE Enemy::type(){
+        return _type;
+    }
+
+    void Enemy::update( bn::fixed_point player_pos){
         if(!_dead)
         {   
             if(!_sprite.value().visible())
@@ -236,7 +285,7 @@ namespace fe
 
             if(_type == ENEMY_TYPE::SLIME || _type == ENEMY_TYPE::BOSS){
                 if(!_invulnerable && _grounded && _direction_timer > 30){
-                    if((_will_fall() && _type != ENEMY_TYPE::BOSS) || _will_hit_wall()){
+                    if(_will_fall() || _will_hit_wall()){
                         _dx = 0;
                         _dir = -_dir;
                         _direction_timer = 0;
@@ -248,6 +297,35 @@ namespace fe
                         _dx += _dir*acc;
                     }
                 } else {
+                    if(player_pos.y() - 8 == _pos.y()){
+                        if(player_pos.x() < _pos.x() && !_sprite.value().horizontal_flip()){
+                            _dx = 0;
+                            _dir = -_dir;
+                            _direction_timer = 0;
+                            _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
+                        } else if(player_pos.x() > _pos.x() && _sprite.value().horizontal_flip()){
+                            _dx = 0;
+                            _dir = -_dir;
+                            _direction_timer = 0;
+                            _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
+                        }
+                        if(bn::abs(player_pos.x() - _pos.x()) < 80 && bn::abs(player_pos.x() - _pos.x()) > 16 && boss_tele_timer > 60){
+                            bn::fixed diff = player_pos.x() - _pos.x();
+                            BN_LOG(_fall_check(_pos.x() + diff*2, _pos.y()));
+                            if(_fall_check(_pos.x() + diff*2, _pos.y())){
+                                boss_tele_timer = 0;
+                                _pos.set_x(_pos.x() + diff*2);
+                                _dx = 0;
+                                _dir = -_dir;
+                                _direction_timer = 0;
+                                _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
+                            }
+                            
+                        } else {
+                            ++boss_tele_timer;
+                        }
+                    } 
+                    
                     if(!_invulnerable && _grounded){
                         _dx += _dir*acc/2;
                     }
@@ -270,11 +348,12 @@ namespace fe
             }
             
             _dx = _dx * friction;
-            if(_dx > 0){
-                _sprite.value().set_horizontal_flip(false);
-            } else {
-                _sprite.value().set_horizontal_flip(true);
-            }
+
+            // if(_dx > 0){
+            //     _sprite.value().set_horizontal_flip(false);
+            // } else if(_dx < 0){
+            //     _sprite.value().set_horizontal_flip(true);
+            // }
 
             //fall
             if(_dy > 0){
@@ -317,6 +396,7 @@ namespace fe
                 _pos.set_x(_pos.x() + _dx);
                 _pos.set_y(_pos.y() + _dy);
                 _sprite.value().set_position(_pos);
+                _sprite.value().set_y(_sprite.value().y() - 1);
             }
             
             if(!_action.value().done()){

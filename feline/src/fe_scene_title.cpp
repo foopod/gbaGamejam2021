@@ -29,6 +29,8 @@
 #include "bn_sprite_items_title_2.h"
 #include "bn_affine_bg_items_title.h"
 
+#include "bn_music_items.h"
+
 namespace fe
 {
     bn::fixed loop(bn::fixed number, bn::fixed increment){
@@ -46,6 +48,7 @@ namespace fe
         bn::affine_bg_ptr map = bn::affine_bg_items::title.create_bg(0, 0);
 
         bn::fixed_point init_pos = bn::fixed_point(-70, 44);
+        bn::music_items::mystic.play();
 
         // player sprite
         bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y());

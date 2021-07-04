@@ -45,16 +45,18 @@ namespace fe
             bool _take_damage(int damage);
             bool _will_hit_wall();
             bool _will_fall();
+            bool _fall_check(bn::fixed x, bn::fixed y);
 
         public:
             Enemy(int x, int y, bn::camera_ptr camera, bn::affine_bg_ptr map, ENEMY_TYPE type, int hp);
-            void update();
+            void update(bn::fixed_point player_pos);
             bn::fixed_point pos();
             bool is_hit(Hitbox attack);
             void set_visible(bool visibility);
             bool damage_from_left(int damage);
             bool damage_from_right(int damage);
             int hp();
+            ENEMY_TYPE type();
     };
 }
 

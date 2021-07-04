@@ -13,6 +13,7 @@
 
 #include "bn_sprite_items_cat_sprite.h"
 #include "bn_sprite_items_text_bg.h"
+#include "bn_sprite_items_spin_glow.h"
 
 #include "fe_hitbox.h"
 #include "fe_player.h"
@@ -88,11 +89,15 @@ namespace fe
         _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),
         _text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0)),
         _healthbar(fe::Healthbar()),
-        _data(fe::Data())
+        _data(fe::Data()),
+        _glow_sprite(bn::sprite_items::spin_glow.create_sprite(0, 0))
     {
         _map.set_visible(false); // why can't I leave something uninitialised
         _sprite.put_above();
         _sprite.set_visible(false);
+        _sprite.put_above();
+        _glow_sprite.set_visible(false);
+        _glow_sprite.set_camera(_camera);
 
         _healthbar.set_visible(false);
 
@@ -106,6 +111,10 @@ namespace fe
         _text_bg2.set_visible(false);
     }
 
+    void Player::set_healthbar_visibility(bool is_visible){
+        _healthbar.set_visible(is_visible);
+    }
+
     void Player::spawn(bn::fixed_point pos, bn::camera_ptr camera, bn::affine_bg_ptr map, bn::vector<Enemy,16>& enemies){
         _pos = pos;
         _camera = camera;
@@ -114,7 +123,7 @@ namespace fe
         _enemies = &enemies;
         _map.set_visible(true);
         _sprite.set_visible(true);
-
+        _healthbar.set_visible(false);
         reset();
     }
 
@@ -122,7 +131,6 @@ namespace fe
         _sprite.set_camera(_camera);
         _sprite.set_bg_priority(1);
         _sprite.put_above();
-        _healthbar.set_visible(true);
         _text_bg1.set_camera(_camera);
         _text_bg2.set_camera(_camera);
         _update_camera(1);
@@ -211,19 +219,19 @@ namespace fe
     }
 
     void Player::collide_with_enemies(){
-        Hitbox damage_hitbox = Hitbox(_pos.x(),_pos.y()+2, 8, 8);
-        if(!_invulnerable){
-            for(int i = 0; i < _enemies->size(); i++)
+        Hitbox collide_hitbox = Hitbox(_pos.x(),_pos.y()+2, 8, 12);
+        for(int i = 0; i < _enemies->size(); i++)
+        {
+            if(_enemies->at(i).is_hit(collide_hitbox))
             {
-                if(_enemies->at(i).is_hit(damage_hitbox))
-                {
+                if((_enemies->at(i).type() != ENEMY_TYPE::WALL && !_invulnerable) || (_enemies->at(i).type() == ENEMY_TYPE::WALL && !_healthbar.is_glow_active())){
                     _invulnerable = true;
                     _healthbar.set_hp(_healthbar.hp() - 1);
                     _dy -= 0.3;
-                    if(_sprite.horizontal_flip()){
-                        _dx += 5;
-                    } else {
-                        _dx -= 5;
+                    if(_dx < 0){
+                        _dx += 6;
+                    } else if(_dx > 0){
+                        _dx -= 6;
                     }
                 }
             }
@@ -276,7 +284,6 @@ namespace fe
         {
             if(check_collisions_map(_pos, right,_hitbox_right, map, level, _map_cells)){
                 _dx = 0;
-                
             }
         } 
         else if (_dx < 0) // moving left
@@ -425,6 +432,28 @@ namespace fe
         {
             attack();
         } 
+
+        // attack
+        if(bn::keypad::l_pressed())
+        {
+            if(_healthbar.is_glow_ready()){
+                _healthbar.activate_glow();
+                _glow_sprite.set_visible(true);
+                _glow_sprite.set_bg_priority(1);
+                _glow_sprite.put_below();
+                _glow_sprite.set_scale(0.8);
+                _glow_sprite.set_camera(_camera);
+                _spin_action = bn::create_sprite_animate_action_forever(
+                        _glow_sprite, 5, bn::sprite_items::spin_glow.tiles_item(), 0,1,2,3);
+            }
+        } 
+        if(_healthbar.is_glow_active()){
+            _glow_sprite.set_position(_pos);
+            _spin_action.value().update();
+        } else {
+            _glow_sprite.set_visible(false);
+        }
+        _healthbar.update();
 
         check_attack();
 

@@ -23,6 +23,7 @@ namespace fe
     {
         private:
             bn::sprite_ptr _sprite;
+            bn::sprite_ptr _glow_sprite;
             bn::fixed _dx;
             bn::fixed _dy;
             bn::fixed_point _pos;
@@ -45,6 +46,8 @@ namespace fe
             bool _already_running = false;
             bool _attacking = false;
 
+            bool _glow_unlocked = true;
+
             bool _invulnerable = false;
             int _inv_timer = 0;
 
@@ -60,6 +63,7 @@ namespace fe
             fe::Hitbox _hitbox_jump = Hitbox(0,4,8,4);
             bn::sprite_animate_action<10> _action = bn::create_sprite_animate_action_forever(
                         _sprite, 30, bn::sprite_items::cat_sprite.tiles_item(), 0,1,0,1,0,1,0,1,0,1);
+            bn::optional<bn::sprite_animate_action<4>> _spin_action;
             void _update_camera(int lerp);
             
 
@@ -78,6 +82,7 @@ namespace fe
             void move_right();
             void move_left();
             void check_attack();
+            void set_healthbar_visibility(bool is_visible);
             void set_listening(bool is_listening);
             bool is_listening();
             void set_can_wallrun(bool can_wallrun);

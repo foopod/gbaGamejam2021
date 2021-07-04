@@ -8,7 +8,7 @@ namespace fe
     class Loading
     {       
         public:
-            void execute();
+            void execute(Scene next_scene);
     };
 }
 
