@@ -35,6 +35,7 @@ namespace fe
             bool _grounded = false;
             int _inv_timer = 0;
             bool _stunned = false;
+            int _sound_timer = 0;
             bn::optional<bn::sprite_ptr> _sprite;
             bn::optional<bn::sprite_animate_action<4>> _action;
 

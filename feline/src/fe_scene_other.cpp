@@ -50,7 +50,7 @@ namespace fe
 
         bn::sprite_text_generator text_generator(variable_8x8_sprite_font);
         bn::music_items::sanctuary.play();
-        bn::music::set_volume(1);
+        bn::music::set_volume(0.8);
 
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::other.create_bg(512, 512);

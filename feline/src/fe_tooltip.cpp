@@ -23,6 +23,7 @@ namespace fe
     }
 
     void Tooltip::update(){
+        _text_generator.set_left_alignment();
         if(_is_talking){
             if(_currentChar == _line.size()){
                 if(bn::keypad::a_pressed())

@@ -22,7 +22,7 @@ namespace fe
         _weapon(WEAPON_TYPE::CLAW),
         _weapon_sprite(bn::sprite_items::weapon_claw.create_sprite(x-6, y,0)),
         _action(bn::create_sprite_animate_action_once(
-                        _weapon_sprite, 1, bn::sprite_items::weapon_claw.tiles_item(), 0,0,0,0,0,0,0,0,0,0))
+                        _weapon_sprite, 1, bn::sprite_items::weapon_claw.tiles_item(), 1,1,1,1,1,1,1,1,1,1))
     {
         _hp = 9;
         for(int i = 0; i < 5; ++i){
@@ -50,22 +50,13 @@ namespace fe
     void Healthbar::activate_glow(){
         _is_glowing = true;
         _action = bn::create_sprite_animate_action_once(
-                        _weapon_sprite, 30, bn::sprite_items::weapon_claw.tiles_item(), 1,1,1,1,1,1,1,1,1,1);
+                        _weapon_sprite, 15, bn::sprite_items::weapon_claw.tiles_item(), 0,0,8,7,6,5,4,3,2,1);
     }
 
     void Healthbar::update(){
-        if(_is_glowing && _action.value().done()){
-            _is_glowing = false;
-            _action = bn::create_sprite_animate_action_once(
-                        _weapon_sprite, 60, bn::sprite_items::weapon_claw.tiles_item(), 1,2,3,4,5,6,7,8,0,0);
-        }
         if(!_action.value().done()){
             _action.value().update();
         }
-    }
-
-    bool Healthbar::is_glow_active(){
-        return _is_glowing;
     }
 
     bool Healthbar::is_glow_ready(){

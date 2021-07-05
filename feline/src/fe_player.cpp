@@ -24,6 +24,8 @@
 #include "fe_enemy_type.h"
 
 #include "bn_affine_bg_items_house.h"
+#include "bn_sound_items.h"
+
 
 namespace fe
 {
@@ -76,7 +78,6 @@ namespace fe
 
     //constants
     constexpr const bn::fixed gravity = 0.2;
-    constexpr const bn::fixed wall_run_speed =0.25;
     constexpr const bn::fixed jump_power = 4;
     constexpr const bn::fixed acc = 0.4;
     constexpr const bn::fixed max_dy = 6;
@@ -90,14 +91,16 @@ namespace fe
         _text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0)),
         _healthbar(fe::Healthbar()),
         _data(fe::Data()),
-        _glow_sprite(bn::sprite_items::spin_glow.create_sprite(0, 0))
+        _tele_sprite(bn::sprite_items::cat_sprite.create_sprite(0, 0))
     {
         _map.set_visible(false); // why can't I leave something uninitialised
         _sprite.put_above();
         _sprite.set_visible(false);
-        _sprite.put_above();
-        _glow_sprite.set_visible(false);
-        _glow_sprite.set_camera(_camera);
+        _tele_sprite.set_bg_priority(1);
+        _tele_sprite.put_above();
+        _tele_sprite.set_item(bn::sprite_items::cat_sprite, 16);
+        _tele_sprite.set_visible(false);
+        
 
         _healthbar.set_visible(false);
 
@@ -133,6 +136,8 @@ namespace fe
         _sprite.put_above();
         _text_bg1.set_camera(_camera);
         _text_bg2.set_camera(_camera);
+        _tele_sprite.set_visible(true);
+        _tele_sprite.set_camera(_camera);
         _update_camera(1);
         _dy = 0;
         _dy = 0;
@@ -142,12 +147,8 @@ namespace fe
         _listening = false;
         _grounded = false;
         _sliding = false;
-        _wall_running = false;
-        _wall_jumped = false;
         _already_running = false;
         _attacking = false;
-
-        _can_wallrun = false;
     }
 
     bn::fixed_point Player::pos()
@@ -162,11 +163,6 @@ namespace fe
         _text_bg2.set_visible(_listening);
     }
 
-    void Player::set_can_wallrun(bool can_wallrun)
-    {
-        _can_wallrun = can_wallrun;
-    }
-
     bool Player::is_listening()
     {
         return _listening;
@@ -177,15 +173,13 @@ namespace fe
         if(_grounded && !_listening){
             _dy-= jump_power;
             _grounded = false;
-        } else if (_wall_running && !_wall_jumped){
-            _dy-= jump_power;
-            _wall_jumped = true;
         }
     }
 
     void Player::attack()
     {
         _attacking = true;
+        bn::sound_items::swipe.play();
     }
 
     bool Player::is_right()
@@ -224,7 +218,7 @@ namespace fe
         {
             if(_enemies->at(i).is_hit(collide_hitbox))
             {
-                if((_enemies->at(i).type() != ENEMY_TYPE::WALL && !_invulnerable) || (_enemies->at(i).type() == ENEMY_TYPE::WALL && !_healthbar.is_glow_active())){
+                if(!_invulnerable){
                     _invulnerable = true;
                     _healthbar.set_hp(_healthbar.hp() - 1);
                     _dy -= 0.3;
@@ -241,11 +235,7 @@ namespace fe
     void Player::collide_with_objects(bn::affine_bg_ptr map, fe::Level level){
         // if falling
         if(_dy > 0){
-            if(!_wall_running){
-                _falling = true;
-            } else {
-                _falling = false;
-            }
+            _falling = true;
             _grounded = false;
             _jumping = false;
             
@@ -257,8 +247,6 @@ namespace fe
             if(check_collisions_map(_pos, down, _hitbox_fall, map, level, _map_cells))
             {
                 _grounded = true;
-                _wall_jumped = false;
-                _wall_running = false;
                 _falling = false;
                 _dy = 0;
                 _pos.set_y(_pos.y() - modulo(_pos.y(),8));
@@ -267,16 +255,11 @@ namespace fe
         } 
         else if(_dy < 0) // jumping
         {
-            if(!_wall_running){
-                _jumping = true;
-            } else {
-                _jumping = false;
-            }
-            
+            _jumping = true;
+            _falling = false;
             if(check_collisions_map(_pos, up, _hitbox_jump, map, level, _map_cells))
             {
                 _dy = 0;
-                _wall_running = false;
             }
         }
 
@@ -292,6 +275,12 @@ namespace fe
                 _dx = 0;
             }
         }
+    }
+
+    void Player::hide(){
+        _tele_sprite.set_visible(false);
+        _healthbar.set_visible(false);
+        _sprite.set_visible(false);
     }
 
     void Player::move_right(){
@@ -322,12 +311,6 @@ namespace fe
         } else if(_jumping){
             _action = bn::create_sprite_animate_action_forever(
                             _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 12,12,12,12,12,12,12,12,12,12);
-        } else if(_wall_running){
-            if(_action.graphics_indexes().front() != 8){
-                _action = bn::create_sprite_animate_action_forever(
-                            _sprite, 2.5, bn::sprite_items::cat_sprite.tiles_item(), 8, 9,10,11, 2, 3, 4, 5, 6,7);
-            }
-            _sprite.set_vertical_scale(0.9);
         } else if(_falling){
             _action = bn::create_sprite_animate_action_forever(
                             _sprite, 6, bn::sprite_items::cat_sprite.tiles_item(), 13,13,13,13,13,13,13,13,13,13);
@@ -406,53 +389,50 @@ namespace fe
             }
         } 
         
-        if(bn::keypad::up_held()){
-            if(_dy > 0 && bn::abs(_dx) > 1 && !_wall_jumped && _can_wallrun){
-                _wall_running = true;
-                _dy = _dy / 2;
-            }
-            
-        } else {
-            _wall_running = false;
-        }
-        
         if(_listening){
             _text_bg1.set_position(_camera.x()+64+8, _camera.y() + 40+24);
             _text_bg2.set_position(_camera.x()-64+8, _camera.y() + 40+24);
         }
 
         // jump
-        if(bn::keypad::a_pressed())
+        if(bn::keypad::a_pressed() && !_listening)
         {
             jump();
         } 
 
         // attack
-        if(bn::keypad::b_pressed())
+        if(bn::keypad::b_pressed() && !_listening)
         {
             attack();
         } 
 
         // attack
-        if(bn::keypad::l_pressed())
+        if(bn::keypad::l_pressed() && !_listening)
         {
-            if(_healthbar.is_glow_ready()){
+            if(_can_teleport && _healthbar.is_glow_ready()){
+                BN_LOG(_tele_sprite.position().x());
+                _tele_sprite.set_position(_pos);
+                _tele_sprite.set_horizontal_flip(!is_right());
                 _healthbar.activate_glow();
-                _glow_sprite.set_visible(true);
-                _glow_sprite.set_bg_priority(1);
-                _glow_sprite.put_below();
-                _glow_sprite.set_scale(0.8);
-                _glow_sprite.set_camera(_camera);
-                _spin_action = bn::create_sprite_animate_action_forever(
-                        _glow_sprite, 5, bn::sprite_items::spin_glow.tiles_item(), 0,1,2,3);
+                bn::sound_items::teleport.play();
+                int dist_to_wall = 80;
+                if(is_right()){
+                    for(int index = 80; index > 0; index-=4){
+                        if(check_collisions_map(bn::fixed_point(_pos.x() + index, _pos.y()), right,_hitbox_right, map, level, _map_cells)){
+                            dist_to_wall = index-4;
+                        }
+                    }
+                    _pos.set_x(_pos.x() + dist_to_wall);
+                } else {
+                    for(int index = 80; index > 0; index-=4){
+                        if(check_collisions_map(bn::fixed_point(_pos.x() - index, _pos.y()), right,_hitbox_right, map, level, _map_cells)){
+                            dist_to_wall = index-4;
+                        }
+                    }
+                    _pos.set_x(_pos.x() - dist_to_wall);
+                }
             }
         } 
-        if(_healthbar.is_glow_active()){
-            _glow_sprite.set_position(_pos);
-            _spin_action.value().update();
-        } else {
-            _glow_sprite.set_visible(false);
-        }
         _healthbar.update();
 
         check_attack();

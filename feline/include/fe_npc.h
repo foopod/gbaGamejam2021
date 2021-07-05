@@ -74,10 +74,27 @@ namespace fe
                 "The tortoise brigade is on the case."
             };
 
-            bn::string_view _penguin_lines[4] = {
+            bn::string_view _penguin_lines[3] = {
                 "Hurry!",
                 "I saw them head down.",
-                "They were heading for the caves!",
+                "They were heading for the caves!"
+            };
+
+            bn::string_view _tablet_lines[4] = {
+                "You feel warm",
+                "You feel energized",
+                "Almost like the energy could burst from",
+                ".. within you at any moment",
+            };
+
+            bn::string_view _cage_lines[7] = {
+                "DAD!!!",
+                "You found me!",
+                "They took mum and the others",
+                "We have to save them!",
+                "But we are going to need reinforcements",
+                "We should find Uncle Jeremy",
+                "Come on Dad, Let's Go!",
             };
 
         public:

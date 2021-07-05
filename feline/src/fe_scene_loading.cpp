@@ -31,7 +31,7 @@ namespace fe
     {
         bn::fixed_point init_pos = bn::fixed_point(0, 0);
 
-        bn::music::set_volume(0.6);
+        bn::music::set_volume(0.3);
         
         // player sprite
         bn::sprite_ptr cat_sprite1 = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y()-50);

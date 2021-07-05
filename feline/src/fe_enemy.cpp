@@ -15,6 +15,7 @@
 #include "bn_sprite_items_box.h"
 #include "bn_affine_bg_map_ptr.h"
 
+#include "bn_sound_items.h"
 
 namespace fe
 {
@@ -132,6 +133,7 @@ namespace fe
         _dir = 1;
         _direction_timer = 0;
         _grounded = false;
+        _sprite.value().set_horizontal_flip(true);
         return _take_damage(damage);
     }
 
@@ -146,6 +148,7 @@ namespace fe
         _dir = -1;
         _direction_timer = 0;
         _grounded = false;
+        _sprite.value().set_horizontal_flip(false);
         return _take_damage(damage);
     }
 
@@ -155,6 +158,7 @@ namespace fe
             _hp -= damage;
             _invulnerable = true;
             if(_hp <= 0){
+                bn::sound_items::death.play();
                 if(_type == ENEMY_TYPE::SLIME){
                     _action = bn::create_sprite_animate_action_once(
                         _sprite.value(), 5, bn::sprite_items::slime_sprite.tiles_item(), 2,3,3,3);
@@ -295,6 +299,12 @@ namespace fe
                 if(_type == ENEMY_TYPE::SLIME){
                     if((_action.value().current_index() == 1 || _action.value().current_index() == 3)  && !_invulnerable && _grounded){
                         _dx += _dir*acc;
+                        if(_sound_timer > 20){
+                            bn::sound_items::slime.play(0.3);
+                            _sound_timer = 0;
+                        } else {
+                            ++_sound_timer;
+                        }
                     }
                 } else {
                     if(player_pos.y() - 8 == _pos.y()){
@@ -311,9 +321,9 @@ namespace fe
                         }
                         if(bn::abs(player_pos.x() - _pos.x()) < 80 && bn::abs(player_pos.x() - _pos.x()) > 16 && boss_tele_timer > 60){
                             bn::fixed diff = player_pos.x() - _pos.x();
-                            BN_LOG(_fall_check(_pos.x() + diff*2, _pos.y()));
-                            if(_fall_check(_pos.x() + diff*2, _pos.y())){
+                            if(_fall_check(_pos.x() + diff*2, _pos.y()) && _hp>0){
                                 boss_tele_timer = 0;
+                                bn::sound_items::teleport.play();
                                 _pos.set_x(_pos.x() + diff*2);
                                 _dx = 0;
                                 _dir = -_dir;
@@ -349,11 +359,11 @@ namespace fe
             
             _dx = _dx * friction;
 
-            // if(_dx > 0){
-            //     _sprite.value().set_horizontal_flip(false);
-            // } else if(_dx < 0){
-            //     _sprite.value().set_horizontal_flip(true);
-            // }
+            if(_dx > 0){
+                _sprite.value().set_horizontal_flip(false);
+            } else if(_dx < 0){
+                _sprite.value().set_horizontal_flip(true);
+            }
 
             //fall
             if(_dy > 0){

@@ -7,7 +7,9 @@ namespace fe
     {
         GOLEM,
         PENGUIN,
-        TORTOISE
+        TORTOISE,
+        TABLET,
+        CAGE
     };
 }
 

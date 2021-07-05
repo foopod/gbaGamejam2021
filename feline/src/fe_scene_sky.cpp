@@ -42,7 +42,7 @@ namespace fe
         bn::sprite_text_generator text_generator(variable_8x8_sprite_font);
 
         bn::music_items::piana.play();
-        bn::music::set_volume(1);
+        bn::music::set_volume(0.6);
 
         //NPC
         NPC penguin = NPC(bn::fixed_point(231, 312), camera, NPC_TYPE::PENGUIN, text_generator);

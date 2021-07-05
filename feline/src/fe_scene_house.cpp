@@ -43,7 +43,7 @@ namespace fe
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
         bn::music_items::piana.play();
-        bn::music::set_volume(1);
+        bn::music::set_volume(0.7);
 
         //NPC
         NPC tortoise = NPC(bn::fixed_point(380, 376), camera, NPC_TYPE::TORTOISE, text_generator);

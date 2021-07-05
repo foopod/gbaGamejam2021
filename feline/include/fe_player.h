@@ -23,7 +23,7 @@ namespace fe
     {
         private:
             bn::sprite_ptr _sprite;
-            bn::sprite_ptr _glow_sprite;
+            bn::sprite_ptr _tele_sprite;
             bn::fixed _dx;
             bn::fixed _dy;
             bn::fixed_point _pos;
@@ -31,8 +31,6 @@ namespace fe
             bn::sprite_ptr _text_bg1;
             bn::sprite_ptr _text_bg2;
             fe::Healthbar _healthbar;
-            
-            bool _can_wallrun = false;
 
             //used for state management
             bool _jumping = false;
@@ -41,8 +39,6 @@ namespace fe
             bool _listening = false;
             bool _grounded = false;
             bool _sliding = false;
-            bool _wall_running = false;
-            bool _wall_jumped = false;
             bool _already_running = false;
             bool _attacking = false;
 
@@ -50,6 +46,8 @@ namespace fe
 
             bool _invulnerable = false;
             int _inv_timer = 0;
+
+            bool _can_teleport = true;
 
             Data _data;
 
@@ -59,8 +57,8 @@ namespace fe
 
             fe::Hitbox _hitbox_fall = Hitbox(0,8,8,0);
             fe::Hitbox _hitbox_left = Hitbox(-4,0,4,8);
-            fe::Hitbox _hitbox_right = Hitbox(4,0,4,8);
-            fe::Hitbox _hitbox_jump = Hitbox(0,4,8,4);
+            fe::Hitbox _hitbox_right = Hitbox(4,0,6,8);
+            fe::Hitbox _hitbox_jump = Hitbox(0,4,6,4);
             bn::sprite_animate_action<10> _action = bn::create_sprite_animate_action_forever(
                         _sprite, 30, bn::sprite_items::cat_sprite.tiles_item(), 0,1,0,1,0,1,0,1,0,1);
             bn::optional<bn::sprite_animate_action<4>> _spin_action;
@@ -70,7 +68,7 @@ namespace fe
         public:
             Player(bn::sprite_ptr sprite);
 
-            
+            void hide();
             Data data();
             
             [[nodiscard]] bn::fixed_point pos();
@@ -85,7 +83,6 @@ namespace fe
             void set_healthbar_visibility(bool is_visible);
             void set_listening(bool is_listening);
             bool is_listening();
-            void set_can_wallrun(bool can_wallrun);
             void apply_animation_state();
             void update_position(bn::affine_bg_ptr map, fe::Level level);
 

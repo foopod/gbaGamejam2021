@@ -76,6 +76,7 @@ int main()
         {
             fe::End end = fe::End();
             scene = end.execute();
+            scene = fe::Scene::TITLE;
         }
         else if(scene == fe::Scene::OTHER)
         {
@@ -85,9 +86,9 @@ int main()
         else if(scene == fe::Scene::OTHER_DUNGEON)
         {
             fe::DungeonReturn dungeon = fe::DungeonReturn();
-            scene = dungeon.execute(player, bn::fixed_point(252, 848));
+            scene = dungeon.execute(player, bn::fixed_point(212, 848));
         }
-        cat_sprite.set_visible(false);
+        player.hide();
         fe::Loading loading = fe::Loading();
         loading.execute(scene);
         bn::core::update();

@@ -60,7 +60,7 @@ namespace fe
         int kill_timer = 0;
 
         bn::music_items::mellowdy.play();
-        bn::music::set_volume(0.6);
+        bn::music::set_volume(0.2);
         
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::dungeon_other.create_bg(512, 512);
@@ -84,7 +84,7 @@ namespace fe
 
         //Enemies
         bn::vector<Enemy, 16> enemies = {};
-        enemies.push_back(Enemy(408, 872, camera, map, ENEMY_TYPE::WALL, 100));
+        // enemies.push_back(Enemy(408, 872, camera, map, ENEMY_TYPE::WALL, 100));
         enemies.push_back(Enemy(734, 808, camera, map, ENEMY_TYPE::SLIME, 2));
         enemies.push_back(Enemy(734, 680, camera, map, ENEMY_TYPE::SLIME, 2));
         enemies.push_back(Enemy(254, 568, camera, map, ENEMY_TYPE::SLIME, 2));
@@ -104,12 +104,12 @@ namespace fe
         //player
         player.spawn(spawn_location, camera, map, enemies);
         player.set_healthbar_visibility(true);
-        player.set_can_wallrun(true);
 
         // //NPC
-        // NPC golem = NPC(bn::fixed_point(155, 704), camera, NPC_TYPE::GOLEM, text_generator);
-        // Tooltip explain_attack = Tooltip(bn::fixed_point(243, 160),"Press 'B' to Attack", text_generator);
-        // Tooltip explain_wallrun = Tooltip(bn::fixed_point(454, 256),"Hold 'Up' to Wallrun", text_generator);
+        NPC tablet = NPC(bn::fixed_point(300, 872), camera, NPC_TYPE::TABLET, text_generator);
+        NPC cage = NPC(bn::fixed_point(254, 208), camera, NPC_TYPE::CAGE, text_generator);
+        Tooltip explain_teleport = Tooltip(bn::fixed_point(420, 880),"Tap 'L' to Teleport", text_generator);
+        Tooltip explain_recharge = Tooltip(bn::fixed_point(445, 880),"It takes some time to recharge though.", text_generator);
 
         // bn::vector<StorySave, 4> saves = {};
         // saves.push_back(StorySave(bn::fixed_point(323, 232), STORY_TYPE::FIRST, camera, text_generator));
@@ -131,19 +131,35 @@ namespace fe
             // }
             
 
-            // if(golem.check_trigger(player.pos()))
-            // {
-            //     if(bn::keypad::up_pressed()){
-            //         player.set_listening(true);
-            //         golem.talk();
-            //     }else if(!golem.is_talking()){
-            //         player.set_listening(false);
-            //     }
-            // }
-            // else if(explain_attack.check_trigger(player.pos())){
-            //     player.set_listening(true);
-            //     explain_attack.update();
-            // }
+            if(tablet.check_trigger(player.pos()))
+            {
+                if(bn::keypad::up_pressed()){
+                    player.set_listening(true);
+                    tablet.talk();
+                }else if(!tablet.is_talking()){
+                    player.set_listening(false);
+                }
+            }
+            else if(cage.check_trigger(player.pos()))
+            {
+                if(bn::keypad::up_pressed()){
+                    player.set_listening(true);
+                    cage.talk();
+                }else if(!cage.is_talking()){
+                    player.set_listening(false);
+                }
+            }
+            else if(explain_teleport.check_trigger(player.pos())){
+                player.set_listening(true);
+                explain_teleport.update();
+            }
+            else if(explain_recharge.check_trigger(player.pos())){
+                player.set_listening(true);
+                explain_recharge.update();
+            }
+            else {
+                player.set_listening(false);
+            }
             // else if(explain_wallrun.check_trigger(player.pos())){
             //     player.set_listening(true);
             //     explain_wallrun.update();
@@ -167,7 +183,8 @@ namespace fe
             //         save.update();
             //     }
             // }
-            // golem.update();
+            tablet.update();
+            cage.update();
 
             for(Enemy& enemy : enemies){
                 if(bn::abs(enemy.pos().x() - camera.x()) < 200 && bn::abs(enemy.pos().y() - camera.y()) < 100){
@@ -194,7 +211,10 @@ namespace fe
 
             }
             
-            
+            if(cage.finished_talking()){
+                player.set_listening(false);
+                return Scene::END;
+            }
             
             // BN_PROFILER_RESET();
             bn::core::update();

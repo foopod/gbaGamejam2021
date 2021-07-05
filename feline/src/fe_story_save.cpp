@@ -22,6 +22,8 @@
 #include "bn_regular_bg_items_stone_tablet_translate_4.h"
 #include "variable_8x8_sprite_font.h"
 
+#include "bn_sound_items.h"
+
 
 namespace fe
 {
@@ -77,9 +79,11 @@ namespace fe
     // }
 
     void StorySave::execute_scene(){
+        bn::sound_items::tablet.play();
         _is_near_player = false;
         update();
         _slab.reset();
+        
 
         bn::optional<bn::regular_bg_item> slab_english;
         bn::optional<bn::regular_bg_item> slab_foreign;

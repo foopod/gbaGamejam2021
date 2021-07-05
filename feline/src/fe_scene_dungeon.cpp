@@ -55,7 +55,7 @@ namespace fe
     {
         // spawn_location = bn::fixed_point(760, 900);
         bn::music_items::mellowdy.play();
-        bn::music::set_volume(0.6);
+        bn::music::set_volume(0.2);
 
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
@@ -114,12 +114,10 @@ namespace fe
         //player
         player.spawn(spawn_location, camera, map, enemies);
         player.set_healthbar_visibility(true);
-        player.set_can_wallrun(true);
 
         //NPC
         NPC golem = NPC(bn::fixed_point(155, 704), camera, NPC_TYPE::GOLEM, text_generator);
         Tooltip explain_attack = Tooltip(bn::fixed_point(243, 160),"Press 'B' to Attack", text_generator);
-        Tooltip explain_wallrun = Tooltip(bn::fixed_point(454, 256),"Hold 'Up' to Wallrun", text_generator);
 
         bn::vector<StorySave, 4> saves = {};
         saves.push_back(StorySave(bn::fixed_point(323, 232), STORY_TYPE::FIRST, camera, text_generator));
@@ -153,10 +151,6 @@ namespace fe
             else if(explain_attack.check_trigger(player.pos())){
                 player.set_listening(true);
                 explain_attack.update();
-            }
-            else if(explain_wallrun.check_trigger(player.pos())){
-                player.set_listening(true);
-                explain_wallrun.update();
             }
             else {
                 player.set_listening(false);
