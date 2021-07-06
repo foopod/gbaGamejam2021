@@ -36,7 +36,10 @@
 
 namespace fe
 {
-    Scene House::execute(Player player, bn::fixed_point spawn_location)
+    House::House(Player& player)
+    : _player(&player){}
+
+    Scene House::execute(bn::fixed_point spawn_location)
     {
         bn::sprite_text_generator text_generator(variable_8x8_sprite_font);
 
@@ -55,6 +58,7 @@ namespace fe
         map_bg.set_priority(2);
         map.set_priority(1);
         fe::Level level = fe::Level(map);
+
         // camera
         map.set_camera(camera);
         map_bg.set_camera(camera);
@@ -64,7 +68,7 @@ namespace fe
         bn::vector<Enemy, 16> enemies = {};
 
         // player
-        player.spawn(spawn_location, camera, map, enemies);
+        _player->spawn(spawn_location, camera, map, enemies);
         while(true)
         {
 
@@ -77,33 +81,31 @@ namespace fe
             //     counter = 60;
             // }
 
-            if(tortoise.check_trigger(player.pos()))
+            if(tortoise.check_trigger(_player->pos()))
             {
                 if(bn::keypad::up_pressed()){
-                    player.set_listening(true);
+                    _player->set_listening(true);
                     tortoise.talk();
                 }else if(!tortoise.is_talking()){
-                    player.set_listening(false);
+                    _player->set_listening(false);
                 }
-            // }
-            //  else if(explain_attack.check_trigger(player.pos())){
-            //     player.set_listening(true);
             } else {
-                player.set_listening(false);
+                _player->set_listening(false);
             }
 
             tortoise.update();
             // explain_attack.update();
 
             //elevator.update_position();
-            player.update_position(map,level);
-            player.apply_animation_state();
-            // BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
+            _player->update_position(map,level);
+            _player->apply_animation_state();
+            // BN_LOG(bn::to_string<32>(_player->pos().x())+" " + bn::to_string<32>(_player->pos().y()));
             
             if(bn::keypad::up_pressed())
             {
-                if(player.pos().x() < 570 && player.pos().x() > 540){
-                    if(player.pos().y() < 400 && player.pos().y() > 360){
+                if(_player->pos().x() < 570 && _player->pos().x() > 540){
+                    if(_player->pos().y() < 400 && _player->pos().y() > 360){
+                        _player->delete_data();
                         return Scene::HOUSE_SKY;
                     }
                 }

@@ -24,7 +24,6 @@ namespace fe
         _action(bn::create_sprite_animate_action_once(
                         _weapon_sprite, 1, bn::sprite_items::weapon_claw.tiles_item(), 1,1,1,1,1,1,1,1,1,1))
     {
-        _hp = 9;
         for(int i = 0; i < 5; ++i){
             _sprites[i].set_bg_priority(0);
         }

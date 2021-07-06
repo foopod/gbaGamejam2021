@@ -12,6 +12,10 @@ namespace fe
         DUNGEON_SKY,
         OTHER,
         OTHER_DUNGEON,
+        INTRO,
+        GBA,
+        BUTANO,
+        DEATH,
         LOADING,
         TITLE,
         END

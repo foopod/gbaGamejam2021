@@ -51,9 +51,13 @@
 
 namespace fe
 {
-    Scene Dungeon::execute(Player player, bn::fixed_point spawn_location)
+    Dungeon::Dungeon(Player& player)
+    : _player(&player){}
+
+    Scene Dungeon::execute(bn::fixed_point spawn_location)
     {
         // spawn_location = bn::fixed_point(760, 900);
+
         bn::music_items::mellowdy.play();
         bn::music::set_volume(0.2);
 
@@ -66,7 +70,7 @@ namespace fe
         child.put_above();
         child.set_camera(camera);
         bn::sprite_ptr glow = bn::sprite_items::glow.create_sprite(845, 947);
-        
+
         glow.set_camera(camera);
         glow.set_bg_priority(0);
         glow.set_scale(0.1);
@@ -111,9 +115,9 @@ namespace fe
         enemies.push_back(Enemy(337, 792, camera, map, ENEMY_TYPE::SLIME, 2));
         // enemies.push_back(Enemy(885, 936, camera, map, ENEMY_TYPE::BOSS, 10));
 
-        //player
-        player.spawn(spawn_location, camera, map, enemies);
-        player.set_healthbar_visibility(true);
+        //_player
+        _player->spawn(spawn_location, camera, map, enemies);
+        _player->set_healthbar_visibility(true);
 
         //NPC
         NPC golem = NPC(bn::fixed_point(155, 704), camera, NPC_TYPE::GOLEM, text_generator);
@@ -137,33 +141,39 @@ namespace fe
             //     max_cpu_usage = 0;
             //     counter = 60;
             // }
+
+            
+            if(_player->hp() <= 0){
+                _player->delete_data();
+                return Scene::DEATH;
+            }
             
 
-            if(golem.check_trigger(player.pos()))
+            if(golem.check_trigger(_player->pos()))
             {
                 if(bn::keypad::up_pressed()){
-                    player.set_listening(true);
+                    _player->set_listening(true);
                     golem.talk();
                 }else if(!golem.is_talking()){
-                    player.set_listening(false);
+                    _player->set_listening(false);
                 }
             }
-            else if(explain_attack.check_trigger(player.pos())){
-                player.set_listening(true);
+            else if(explain_attack.check_trigger(_player->pos())){
+                _player->set_listening(true);
                 explain_attack.update();
             }
             else {
-                player.set_listening(false);
+                _player->set_listening(false);
             }
 
             for(StorySave& save : saves){
                 
-                if(save.check_trigger(player.pos()) && bn::keypad::up_pressed()){
+                if(save.check_trigger(_player->pos()) && bn::keypad::up_pressed()){
                     vines.reset();
-                    player.set_healthbar_visibility(false);
+                    _player->set_healthbar_visibility(false);
                     save.execute_scene();
                     vines = bn::regular_bg_items::vines.create_bg(0, 0);
-                    player.set_healthbar_visibility(true);
+                    _player->set_healthbar_visibility(true);
                     vines.value().set_priority(0);
                     vines.value().set_camera(camera);
                 }
@@ -175,31 +185,32 @@ namespace fe
 
             for(Enemy& enemy : enemies){
                 if(bn::abs(enemy.pos().x() - camera.x()) < 200 && bn::abs(enemy.pos().y() - camera.y()) < 100){
-                    enemy.update(player.pos());
+                    enemy.update(_player->pos());
                 } else {
                     enemy.set_visible(false);
                 }
             }
 
-            player.update_position(map,level);
-            player.apply_animation_state();
+            _player->update_position(map,level);
+            _player->apply_animation_state();
 
-             BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
-            vines.value().set_position(bn::fixed_point((player.pos().x()-100)/10,(player.pos().y())/10));
+            //  BN_LOG(bn::to_string<32>(_player->pos().x())+" " + bn::to_string<32>(_player->pos().y()));
+            vines.value().set_position(bn::fixed_point((_player->pos().x()-100)/10,(_player->pos().y())/10));
 
             //door
-            if(bn::keypad::up_pressed() && !player.is_listening())
+            if(bn::keypad::up_pressed() && !_player->is_listening())
             {
-                if(player.pos().x() < 160 && player.pos().x() > 140){
-                    if(player.pos().y() < 200 && player.pos().y() > 188){
+                if(_player->pos().x() < 160 && _player->pos().x() > 140){
+                    if(_player->pos().y() < 200 && _player->pos().y() > 188){
+                        _player->delete_data();
                         return Scene::DUNGEON_SKY;
                     }
                 }
 
             }
             
-            if(player.pos().y() == 944 && player.pos().x() > 790){
-                player.set_healthbar_visibility(false);
+            if(_player->pos().y() == 944 && _player->pos().x() > 790){
+                _player->set_healthbar_visibility(false);
                 scale_action = bn::sprite_scale_to_action(glow, 60, 2);
                 map.set_blending_enabled(true);
                 map_bg.set_blending_enabled(true);
@@ -220,11 +231,13 @@ namespace fe
                     intensity_action.value().update();
                     kill_timer++;
                     if(kill_timer > 60){
+                        _player->delete_data();
                         return Scene::OTHER;
                     }
                 }
             }
             
+            // BN_LOG(_player->hp());
             
             // BN_PROFILER_RESET();
             bn::core::update();

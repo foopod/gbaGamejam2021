@@ -51,7 +51,10 @@
 
 namespace fe
 {
-    Scene DungeonReturn::execute(Player player, bn::fixed_point spawn_location)
+    DungeonReturn::DungeonReturn(Player& player)
+    : _player(&player){}
+
+    Scene DungeonReturn::execute(bn::fixed_point spawn_location)
     {
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
@@ -102,8 +105,9 @@ namespace fe
         // enemies.push_back(Enemy(885, 936, camera, map, ENEMY_TYPE::BOSS, 10));
 
         //player
-        player.spawn(spawn_location, camera, map, enemies);
-        player.set_healthbar_visibility(true);
+        _player->spawn(spawn_location, camera, map, enemies);
+        _player->set_healthbar_visibility(true);
+        _player->set_can_teleport(true);
 
         // //NPC
         NPC tablet = NPC(bn::fixed_point(300, 872), camera, NPC_TYPE::TABLET, text_generator);
@@ -129,36 +133,41 @@ namespace fe
             //     max_cpu_usage = 0;
             //     counter = 60;
             // }
+
+            if(_player->hp() < 1){
+                _player->delete_data();
+                return Scene::DEATH;
+            }
             
 
-            if(tablet.check_trigger(player.pos()))
+            if(tablet.check_trigger(_player->pos()))
             {
                 if(bn::keypad::up_pressed()){
-                    player.set_listening(true);
+                    _player->set_listening(true);
                     tablet.talk();
                 }else if(!tablet.is_talking()){
-                    player.set_listening(false);
+                    _player->set_listening(false);
                 }
             }
-            else if(cage.check_trigger(player.pos()))
+            else if(cage.check_trigger(_player->pos()))
             {
                 if(bn::keypad::up_pressed()){
-                    player.set_listening(true);
+                    _player->set_listening(true);
                     cage.talk();
                 }else if(!cage.is_talking()){
-                    player.set_listening(false);
+                    _player->set_listening(false);
                 }
             }
-            else if(explain_teleport.check_trigger(player.pos())){
-                player.set_listening(true);
+            else if(explain_teleport.check_trigger(_player->pos())){
+                _player->set_listening(true);
                 explain_teleport.update();
             }
-            else if(explain_recharge.check_trigger(player.pos())){
-                player.set_listening(true);
+            else if(explain_recharge.check_trigger(_player->pos())){
+                _player->set_listening(true);
                 explain_recharge.update();
             }
             else {
-                player.set_listening(false);
+                _player->set_listening(false);
             }
             // else if(explain_wallrun.check_trigger(player.pos())){
             //     player.set_listening(true);
@@ -188,23 +197,23 @@ namespace fe
 
             for(Enemy& enemy : enemies){
                 if(bn::abs(enemy.pos().x() - camera.x()) < 200 && bn::abs(enemy.pos().y() - camera.y()) < 100){
-                    enemy.update(player.pos());
+                    enemy.update(_player->pos());
                 } else {
                     enemy.set_visible(false);
                 }
             }
 
-            player.update_position(map,level);
-            player.apply_animation_state();
+            _player->update_position(map,level);
+            _player->apply_animation_state();
 
-             BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
-            vines.value().set_position(bn::fixed_point((player.pos().x()-100)/10,(player.pos().y())/10));
+             BN_LOG(bn::to_string<32>(_player->pos().x())+" " + bn::to_string<32>(_player->pos().y()));
+            vines.value().set_position(bn::fixed_point((_player->pos().x()-100)/10,(_player->pos().y())/10));
 
             //door
-            if(bn::keypad::up_pressed() && !player.is_listening())
+            if(bn::keypad::up_pressed() && !_player->is_listening())
             {
-                if(player.pos().x() < 160 && player.pos().x() > 140){
-                    if(player.pos().y() < 200 && player.pos().y() > 188){
+                if(_player->pos().x() < 160 && _player->pos().x() > 140){
+                    if(_player->pos().y() < 200 && _player->pos().y() > 188){
                         return Scene::DUNGEON_SKY;
                     }
                 }
@@ -212,7 +221,7 @@ namespace fe
             }
             
             if(cage.finished_talking()){
-                player.set_listening(false);
+                _player->set_listening(false);
                 return Scene::END;
             }
             

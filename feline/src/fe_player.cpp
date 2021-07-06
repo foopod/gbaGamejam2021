@@ -93,7 +93,7 @@ namespace fe
         _data(fe::Data()),
         _tele_sprite(bn::sprite_items::cat_sprite.create_sprite(0, 0))
     {
-        _map.set_visible(false); // why can't I leave something uninitialised
+        _map.value().set_visible(false); // why can't I leave something uninitialised
         _sprite.put_above();
         _sprite.set_visible(false);
         _tele_sprite.set_bg_priority(1);
@@ -114,6 +114,18 @@ namespace fe
         _text_bg2.set_visible(false);
     }
 
+    void Player::set_can_teleport(bool can_teleport){
+        _can_teleport = can_teleport;
+    }
+
+    void Player::set_hp(int hp){
+        _healthbar.set_hp(hp);
+    }
+
+    int Player::hp(){
+        return _healthbar.hp();
+    }
+
     void Player::set_healthbar_visibility(bool is_visible){
         _healthbar.set_visible(is_visible);
     }
@@ -124,10 +136,17 @@ namespace fe
         _map = map;
         _map_cells = map.map().cells_ref().value();
         _enemies = &enemies;
-        _map.set_visible(true);
+        _map.value().set_visible(true);
         _sprite.set_visible(true);
         _healthbar.set_visible(false);
         reset();
+    }
+
+    void Player::delete_data(){
+        _camera.reset();
+        _map.reset();
+        _map_cells.reset();
+        // _camera.reset();
     }
 
     void Player::reset(){
@@ -244,7 +263,7 @@ namespace fe
                 _dy = max_dy;
             }
 
-            if(check_collisions_map(_pos, down, _hitbox_fall, map, level, _map_cells))
+            if(check_collisions_map(_pos, down, _hitbox_fall, map, level, _map_cells.value()))
             {
                 _grounded = true;
                 _falling = false;
@@ -257,7 +276,7 @@ namespace fe
         {
             _jumping = true;
             _falling = false;
-            if(check_collisions_map(_pos, up, _hitbox_jump, map, level, _map_cells))
+            if(check_collisions_map(_pos, up, _hitbox_jump, map, level, _map_cells.value()))
             {
                 _dy = 0;
             }
@@ -265,13 +284,13 @@ namespace fe
 
         if(_dx > 0) // moving right
         {
-            if(check_collisions_map(_pos, right,_hitbox_right, map, level, _map_cells)){
+            if(check_collisions_map(_pos, right,_hitbox_right, map, level, _map_cells.value())){
                 _dx = 0;
             }
         } 
         else if (_dx < 0) // moving left
         {
-            if(check_collisions_map(_pos, left, _hitbox_left, map, level, _map_cells)){
+            if(check_collisions_map(_pos, left, _hitbox_left, map, level, _map_cells.value())){
                 _dx = 0;
             }
         }
@@ -337,23 +356,23 @@ namespace fe
         // update camera
         if(_pos.x() < 122+30)
         {
-            _camera.set_x(_camera.x()+ (122-_camera.x()) /lerp);
+            _camera.value().set_x(_camera.value().x()+ (122-_camera.value().x()) /lerp);
         } else if (_pos.x() > 922-30){
-            _camera.set_x(_camera.x()+ (922-20-_camera.x()) /lerp);
+            _camera.value().set_x(_camera.value().x()+ (922-20-_camera.value().x()) /lerp);
         }
         else
         {
             if(_sprite.horizontal_flip()){
-                _camera.set_x(_camera.x()+ (_pos.x() - 30-_camera.x() + _dx*8) /lerp);
+                _camera.value().set_x(_camera.value().x()+ (_pos.x() - 30-_camera.value().x() + _dx*8) /lerp);
             } else {
-                _camera.set_x(_camera.x()+ (_pos.x() +30 -_camera.x() + _dx*8) /lerp);
+                _camera.value().set_x(_camera.value().x()+ (_pos.x() +30 -_camera.value().x() + _dx*8) /lerp);
             }            
         }
 
         if(_pos.y() < 942){
-            _camera.set_y(_camera.y()+ (_pos.y()-10-_camera.y()) /lerp);
+            _camera.value().set_y(_camera.value().y()+ (_pos.y()-10-_camera.value().y()) /lerp);
         } else {
-            _camera.set_y(_camera.y()+(942-_camera.y()) /lerp);
+            _camera.value().set_y(_camera.value().y()+(942-_camera.value().y()) /lerp);
         }
     }
 
@@ -390,8 +409,8 @@ namespace fe
         } 
         
         if(_listening){
-            _text_bg1.set_position(_camera.x()+64+8, _camera.y() + 40+24);
-            _text_bg2.set_position(_camera.x()-64+8, _camera.y() + 40+24);
+            _text_bg1.set_position(_camera.value().x()+64+8, _camera.value().y() + 40+24);
+            _text_bg2.set_position(_camera.value().x()-64+8, _camera.value().y() + 40+24);
         }
 
         // jump
@@ -418,14 +437,14 @@ namespace fe
                 int dist_to_wall = 80;
                 if(is_right()){
                     for(int index = 80; index > 0; index-=4){
-                        if(check_collisions_map(bn::fixed_point(_pos.x() + index, _pos.y()), right,_hitbox_right, map, level, _map_cells)){
+                        if(check_collisions_map(bn::fixed_point(_pos.x() + index, _pos.y()), right,_hitbox_right, map, level, _map_cells.value())){
                             dist_to_wall = index-4;
                         }
                     }
                     _pos.set_x(_pos.x() + dist_to_wall);
                 } else {
                     for(int index = 80; index > 0; index-=4){
-                        if(check_collisions_map(bn::fixed_point(_pos.x() - index, _pos.y()), right,_hitbox_right, map, level, _map_cells)){
+                        if(check_collisions_map(bn::fixed_point(_pos.x() - index, _pos.y()), right,_hitbox_right, map, level, _map_cells.value())){
                             dist_to_wall = index-4;
                         }
                     }

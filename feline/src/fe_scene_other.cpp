@@ -44,7 +44,10 @@
 
 namespace fe
 {
-    Scene Other::execute(Player player, bn::fixed_point spawn_location)
+    Other::Other(Player& player)
+    : _player(&player){}
+
+    Scene Other::execute(bn::fixed_point spawn_location)
     {
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
@@ -86,9 +89,9 @@ namespace fe
         enemies.push_back(Enemy(292, 288, camera, map, ENEMY_TYPE::BOSS, 3));
         enemies.push_back(Enemy(337, 104, camera, map, ENEMY_TYPE::BOSS, 3));
 
-        // player
-        player.spawn(spawn_location, camera, map, enemies);
-        player.set_healthbar_visibility(true);
+        // _player
+        _player->spawn(spawn_location, camera, map, enemies);
+        _player->set_healthbar_visibility(true);
         while(true)
         {
             
@@ -103,23 +106,30 @@ namespace fe
 
             for(Enemy& enemy : enemies){
                 if(bn::abs(enemy.pos().x() - camera.x()) < 200 && bn::abs(enemy.pos().y() - camera.y()) < 100){
-                    enemy.update(player.pos());
+                    enemy.update(_player->pos());
                 } else {
                     enemy.set_visible(false);
                 }
             }
 
 
-            player.update_position(map, level);
-            player.apply_animation_state();
-            // BN_LOG(bn::to_string<32>(player.pos().x())+", " + bn::to_string<32>(player.pos().y()));
+            _player->update_position(map, level);
+            _player->apply_animation_state();
+            // BN_LOG(bn::to_string<32>(_player->pos().x())+", " + bn::to_string<32>(_player->pos().y()));
             
-            if(player.pos().y() > 700){
+            if(_player->pos().y() > 700){
+                _player->delete_data();
                 return Scene::OTHER;
             }
 
-            if(player.pos().y() == 152 && player.pos().x() > 870){
-                player.set_healthbar_visibility(false);
+            if(_player->hp() < 1){
+                _player->delete_data();
+                return Scene::DEATH;
+            }
+            // BN_LOG(_player->hp());
+
+            if(_player->pos().y() == 152 && _player->pos().x() > 870){
+                _player->set_healthbar_visibility(false);
                 scale_action = bn::sprite_scale_to_action(glow, 60, 2);
                 map.set_blending_enabled(true);
                 bg.set_blending_enabled(true);
@@ -139,6 +149,7 @@ namespace fe
                     intensity_action.value().update();
                     kill_timer++;
                     if(kill_timer > 60){
+                        _player->delete_data();
                         return Scene::OTHER_DUNGEON;
                     }
                 }

@@ -9,8 +9,11 @@ namespace fe
 {
     class House
     {       
+        private:
+            Player* _player;
         public:
-            Scene execute(Player player, bn::fixed_point spawn);
+            House(Player& player);
+            Scene execute(bn::fixed_point spawn);
     };
 }
 

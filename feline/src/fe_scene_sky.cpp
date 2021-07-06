@@ -35,7 +35,11 @@
 
 namespace fe
 {
-    Scene Sky::execute(Player player, bn::fixed_point spawn_location)
+
+     Sky::Sky(Player& player)
+    : _player(&player){}
+
+    Scene Sky::execute(bn::fixed_point spawn_location)
     {
         bn::camera_ptr camera = bn::camera_ptr::create(spawn_location.x(), spawn_location.y());
 
@@ -63,8 +67,8 @@ namespace fe
 
         bn::vector<Enemy, 16> enemies = {};
 
-        // player
-        player.spawn(spawn_location, camera, map, enemies);
+        // _player
+        _player->spawn(spawn_location, camera, map, enemies);
         while(true)
         {
             
@@ -77,33 +81,35 @@ namespace fe
             //     counter = 60;
             // }
 
-            if(penguin.check_trigger(player.pos()))
+            if(penguin.check_trigger(_player->pos()))
             {
                 if(bn::keypad::up_pressed()){
-                    player.set_listening(true);
+                    _player->set_listening(true);
                     penguin.talk();
                 }else if(!penguin.is_talking()){
-                    player.set_listening(false);
+                    _player->set_listening(false);
                 }
             }
             penguin.update();
 
             map_bg.set_x(map_bg.x() + 0.3);
 
-            player.update_position(map, level);
-            player.apply_animation_state();
-            // BN_LOG(bn::to_string<32>(player.pos().x())+" " + bn::to_string<32>(player.pos().y()));
+            _player->update_position(map, level);
+            _player->apply_animation_state();
+            // BN_LOG(bn::to_string<32>(_player->pos().x())+" " + bn::to_string<32>(_player->pos().y()));
             
             if(bn::keypad::up_pressed())
             {
-                if(player.pos().x() < 185 && player.pos().x() > 155){
-                    if(player.pos().y() < 580 && player.pos().y() > 550){
+                if(_player->pos().x() < 185 && _player->pos().x() > 155){
+                    if(_player->pos().y() < 580 && _player->pos().y() > 550){
+                        _player->delete_data();
                         return Scene::SKY_DUNGEON;
                     }
                 }
 
-                if(player.pos().x() < 170 && player.pos().x() > 140){
-                    if(player.pos().y() < 230 && player.pos().y() > 200){
+                if(_player->pos().x() < 170 && _player->pos().x() > 140){
+                    if(_player->pos().y() < 230 && _player->pos().y() > 200){
+                        _player->delete_data();
                         return Scene::SKY_HOUSE;
                     }
                 }

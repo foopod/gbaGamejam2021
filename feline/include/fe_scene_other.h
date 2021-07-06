@@ -9,8 +9,11 @@ namespace fe
 {
     class Other
     {       
+        private:
+            Player* _player;
         public:
-            Scene execute(Player player, bn::fixed_point spawn);
+            Other(Player& player);
+            Scene execute( bn::fixed_point spawn);
     };
 }
 

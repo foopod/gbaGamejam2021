@@ -16,7 +16,7 @@ namespace fe
     {
         private:
             bn::sprite_ptr _sprites[5];
-            int _hp;
+            int _hp = 9;
             bool _is_visible;
             WEAPON_TYPE _weapon;
             bn::sprite_ptr _weapon_sprite;

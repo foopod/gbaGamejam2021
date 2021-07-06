@@ -92,7 +92,7 @@ namespace fe
         bn::fixed start_amp = 0;
 
 
-        while(! bn::keypad::start_pressed())
+        while(! bn::keypad::any_pressed())
         {
             // cat_sprite.set_x(cat_sprite.x() + 1.3);
 

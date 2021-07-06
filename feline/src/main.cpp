@@ -28,6 +28,9 @@
 #include "fe_scene_house.h"
 #include "fe_scene_loading.h"
 #include "fe_scene_title.h"
+#include "fe_scene_death.h"
+#include "fe_scene_gba.h"
+#include "fe_scene_butano.h"
 #include "fe_scene_end.h"
 #include "fe_scene.h"
 
@@ -36,7 +39,7 @@
 int main()
 {
     bn::core::init();
-    fe::Scene scene = fe::Scene::TITLE;
+    fe::Scene scene = fe::Scene::GBA;
 
     bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(0,0);
     cat_sprite.set_visible(false);
@@ -45,32 +48,42 @@ int main()
     while(true)
     {
         if(scene == fe::Scene::HOUSE_START){
-            fe::House house = fe::House();
-            scene = house.execute(player, bn::fixed_point(293, 368));
+            fe::House house = fe::House(player);
+            scene = house.execute(bn::fixed_point(293, 368));
         } 
         else if(scene == fe::Scene::HOUSE_SKY){
-            fe::Sky sky = fe::Sky();
-            scene = sky.execute(player, bn::fixed_point(153, 208));
+            fe::Sky sky = fe::Sky(player);
+            scene = sky.execute(bn::fixed_point(153, 208));
         } 
         else if(scene == fe::Scene::SKY_DUNGEON)
         {
-            fe::Dungeon dungeon = fe::Dungeon();
-            scene = dungeon.execute(player, bn::fixed_point(150, 192));
+            fe::Dungeon dungeon = fe::Dungeon(player);
+            scene = dungeon.execute(bn::fixed_point(150, 192));
         } 
         else if(scene == fe::Scene::DUNGEON_SKY)
         {
-            fe::Sky sky = fe::Sky();
-            scene = sky.execute(player, bn::fixed_point(169, 552));
+            fe::Sky sky = fe::Sky(player);
+            scene = sky.execute(bn::fixed_point(169, 552));
         }
         else if(scene == fe::Scene::SKY_HOUSE)
         {
-            fe::House house = fe::House();
-            scene = house.execute(player, bn::fixed_point(555, 384));
+            fe::House house = fe::House(player);
+            scene = house.execute(bn::fixed_point(555, 384));
         }
         else if(scene == fe::Scene::TITLE)
         {
             fe::Title title = fe::Title();
             scene = title.execute();
+        }
+        else if(scene == fe::Scene::GBA)
+        {
+            fe::GBA gba = fe::GBA();
+            scene = gba.execute();
+        }
+        else if(scene == fe::Scene::BUTANO)
+        {
+            fe::Butano butano = fe::Butano();
+            scene = butano.execute();
         }
         else if(scene == fe::Scene::END)
         {
@@ -80,17 +93,24 @@ int main()
         }
         else if(scene == fe::Scene::OTHER)
         {
-            fe::Other other = fe::Other();
-            scene = other.execute(player, bn::fixed_point(235, 590));
+            fe::Other other = fe::Other(player);
+            scene = other.execute(bn::fixed_point(235, 590));
         }
         else if(scene == fe::Scene::OTHER_DUNGEON)
         {
-            fe::DungeonReturn dungeon = fe::DungeonReturn();
-            scene = dungeon.execute(player, bn::fixed_point(212, 848));
+            fe::DungeonReturn dungeon2 = fe::DungeonReturn(player);
+            scene = dungeon2.execute(bn::fixed_point(212, 848));
+        }
+        else if(scene == fe::Scene::DEATH)
+        {
+            fe::Death death = fe::Death(player);
+            scene = death.execute();
         }
         player.hide();
-        fe::Loading loading = fe::Loading();
-        loading.execute(scene);
+        if(scene != fe::Scene::DEATH && scene != fe::Scene::BUTANO && scene != fe::Scene::TITLE){
+            fe::Loading loading = fe::Loading();
+            loading.execute(scene);
+        }
         bn::core::update();
         
     }

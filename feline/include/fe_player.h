@@ -27,7 +27,7 @@ namespace fe
             bn::fixed _dx;
             bn::fixed _dy;
             bn::fixed_point _pos;
-            bn::camera_ptr _camera;
+            bn::optional<bn::camera_ptr> _camera;
             bn::sprite_ptr _text_bg1;
             bn::sprite_ptr _text_bg2;
             fe::Healthbar _healthbar;
@@ -47,12 +47,12 @@ namespace fe
             bool _invulnerable = false;
             int _inv_timer = 0;
 
-            bool _can_teleport = true;
+            bool _can_teleport = false;
 
             Data _data;
 
-            bn::span<const bn::affine_bg_map_cell> _map_cells;
-            bn::affine_bg_ptr _map;
+            bn::optional<bn::span<const bn::affine_bg_map_cell>> _map_cells;
+            bn::optional<bn::affine_bg_ptr> _map;
             bn::vector<Enemy,16>* _enemies;
 
             fe::Hitbox _hitbox_fall = Hitbox(0,8,8,0);
@@ -78,10 +78,14 @@ namespace fe
             void collide_with_objects(bn::affine_bg_ptr map, fe::Level level);
             void collide_with_enemies();
             void move_right();
+            void delete_data();
             void move_left();
             void check_attack();
             void set_healthbar_visibility(bool is_visible);
             void set_listening(bool is_listening);
+            void set_can_teleport(bool can_teleport);
+            void set_hp(int hp);
+            int hp();
             bool is_listening();
             void apply_animation_state();
             void update_position(bn::affine_bg_ptr map, fe::Level level);
