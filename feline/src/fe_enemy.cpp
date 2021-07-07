@@ -129,6 +129,10 @@ namespace fe
         _sprite.value().set_visible(visiblity);
     }
 
+    bool Enemy::is_vulnerable(){
+        return !_invulnerable;
+    }
+
     bool Enemy::damage_from_left(int damage){
         if(_type == ENEMY_TYPE::BOSS && !_invulnerable){
             teleport();
@@ -146,9 +150,9 @@ namespace fe
     bool Enemy::damage_from_right(int damage){
         if(_type == ENEMY_TYPE::BOSS && !_invulnerable){
             teleport();
-        } else if(_type != ENEMY_TYPE::WALL){
+        } else if(_type == ENEMY_TYPE::SLIMEO){
             _dy-=0.4;
-            _dx+=1;
+            // _dx+=1;
         }
         _dir = -1;
         _direction_timer = 0;
@@ -461,10 +465,14 @@ namespace fe
             }
 
             if(_hp >= 0){
-                _pos.set_x(_pos.x() + _dx);
-                _pos.set_y(_pos.y() + _dy);
-                _sprite.value().set_position(_pos);
-                _sprite.value().set_y(_sprite.value().y() - 1);
+                if(_type == ENEMY_TYPE::BOSS && _invulnerable){
+
+                }else {
+                    _pos.set_x(_pos.x() + _dx);
+                    _pos.set_y(_pos.y() + _dy);
+                    _sprite.value().set_position(_pos);
+                    _sprite.value().set_y(_sprite.value().y() - 1); 
+                }
             }
             
             if(!_action.value().done()){

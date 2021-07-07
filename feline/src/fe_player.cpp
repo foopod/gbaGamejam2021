@@ -217,17 +217,17 @@ namespace fe
             
             for(int i = 0; i < _enemies.value()->size(); i++)
             {
-                if(_enemies.value()->at(i).is_hit(attack_hitbox))
+                if(_enemies.value()->at(i).is_hit(attack_hitbox) && _enemies.value()->at(i).is_vulnerable())
                 {
                     if(_sprite.horizontal_flip()){
                         _enemies.value()->at(i).damage_from_left(1);
                         if(_enemies.value()->at(i).type() == ENEMY_TYPE::SLIMEO){
-                            _dx +=1;
+                            _dx =4;
                         }
                     } else {
                         _enemies.value()->at(i).damage_from_right(1);
                         if(_enemies.value()->at(i).type() == ENEMY_TYPE::SLIMEO){
-                            _dx -=1;
+                            _dx =-4;
                         }
                     }
                     
@@ -243,7 +243,7 @@ namespace fe
         {
             if(_enemies.value()->at(i).is_hit(collide_hitbox))
             {
-                if(!_invulnerable){
+                if(!_invulnerable && _enemies.value()->at(i).hp() > 0){
                     _invulnerable = true;
                     _healthbar.set_hp(_healthbar.hp() - 1);
                     _dy -= 0.3;

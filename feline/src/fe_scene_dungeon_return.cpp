@@ -196,7 +196,7 @@ namespace fe
             _player->update_position(map,level);
             _player->apply_animation_state();
 
-             BN_LOG(bn::to_string<32>(_player->pos().x())+" " + bn::to_string<32>(_player->pos().y()));
+            //  BN_LOG(bn::to_string<32>(_player->pos().x())+" " + bn::to_string<32>(_player->pos().y()));
             vines.value().set_position(bn::fixed_point((_player->pos().x()-100)/10,(_player->pos().y())/10));
 
             //door

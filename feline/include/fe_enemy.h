@@ -57,6 +57,7 @@ namespace fe
             void update(bn::fixed_point player_pos);
             bn::fixed_point pos();
             bool is_hit(Hitbox attack);
+            bool is_vulnerable();
             void set_visible(bool visibility);
             void teleport();
             bool damage_from_left(int damage);
