@@ -1,2 +1,0 @@
-[DEBUG] GBA Serial I/O: Lockstep 0: Node init
-[DEBUG] GBA Serial I/O: Lockstep 0: Node init

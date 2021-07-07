@@ -3,3 +3,4 @@ build/*
 *.elfbin
 *.gba
 *.sav
+*/log.txt
