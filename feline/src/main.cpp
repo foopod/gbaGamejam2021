@@ -24,6 +24,7 @@
 #include "fe_scene_dungeon.h"
 #include "fe_scene_dungeon_return.h"
 #include "fe_scene_sky.h"
+#include "fe_scene_sky_return.h"
 #include "fe_scene_other.h"
 #include "fe_scene_house.h"
 #include "fe_scene_loading.h"
@@ -39,7 +40,7 @@
 int main()
 {
     bn::core::init();
-    fe::Scene scene = fe::Scene::GBA;
+    fe::Scene scene = fe::Scene::OTHER;
 
     bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(0,0);
     cat_sprite.set_visible(false);
@@ -64,6 +65,11 @@ int main()
         {
             fe::Sky sky = fe::Sky(player);
             scene = sky.execute(bn::fixed_point(169, 552));
+        }
+        else if(scene == fe::Scene::RETURN_SKY)
+        {
+            fe::SkyReturn sky_return = fe::SkyReturn(player);
+            scene = sky_return.execute(bn::fixed_point(169, 552));
         }
         else if(scene == fe::Scene::SKY_HOUSE)
         {

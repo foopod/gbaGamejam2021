@@ -53,7 +53,7 @@ namespace fe
 
             bn::optional<bn::span<const bn::affine_bg_map_cell>> _map_cells;
             bn::optional<bn::affine_bg_ptr> _map;
-            bn::vector<Enemy,16>* _enemies;
+            bn::optional<bn::vector<Enemy,16>*> _enemies;
 
             fe::Hitbox _hitbox_fall = Hitbox(0,8,8,0);
             fe::Hitbox _hitbox_left = Hitbox(-4,0,4,8);

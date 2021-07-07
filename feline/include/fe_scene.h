@@ -9,6 +9,7 @@ namespace fe
         HOUSE_SKY,
         SKY_HOUSE,
         SKY_DUNGEON,
+        RETURN_SKY,
         DUNGEON_SKY,
         OTHER,
         OTHER_DUNGEON,

@@ -39,6 +39,8 @@
 #include "bn_sprite_text_generator.h"
 #include "variable_8x8_sprite_font.h"
 
+#include "fe_tooltip.h"
+
 #include "bn_music_items.h"
 #include "bn_music_actions.h"
 
@@ -84,10 +86,12 @@ namespace fe
         // bn::fixed max_cpu_usage;
         // int counter = 1;
         bn::vector<Enemy, 16> enemies = {};
-        enemies.push_back(Enemy(576, 576, camera, map, ENEMY_TYPE::BOSS, 3));
-        enemies.push_back(Enemy(673, 384, camera, map, ENEMY_TYPE::BOSS, 3));
-        enemies.push_back(Enemy(292, 288, camera, map, ENEMY_TYPE::BOSS, 3));
-        enemies.push_back(Enemy(337, 104, camera, map, ENEMY_TYPE::BOSS, 3));
+        enemies.push_back(Enemy(576, 576, camera, map, ENEMY_TYPE::BOSS, 5));
+        enemies.push_back(Enemy(673, 384, camera, map, ENEMY_TYPE::BOSS, 5));
+        enemies.push_back(Enemy(292, 288, camera, map, ENEMY_TYPE::BOSS, 5));
+        enemies.push_back(Enemy(337, 104, camera, map, ENEMY_TYPE::BOSS, 5));
+
+        Tooltip explain_kill = Tooltip(bn::fixed_point(903, 144),"Kill all the enemies.", text_generator);
 
         // _player
         _player->spawn(spawn_location, camera, map, enemies);
@@ -103,6 +107,23 @@ namespace fe
             //     max_cpu_usage = 0;
             //     counter = 60;
             // }
+
+            int enemy_count = 0;
+            for(Enemy& enemy : enemies){
+                if(enemy.hp() > 0){
+                    ++enemy_count;
+                }
+            }
+            if(enemy_count > 0){
+                if(explain_kill.check_trigger(_player->pos())){
+                    _player->set_listening(true);
+                    explain_kill.update();
+                }
+                else {
+                    _player->set_listening(false);
+                }
+            }
+            
 
             for(Enemy& enemy : enemies){
                 if(bn::abs(enemy.pos().x() - camera.x()) < 200 && bn::abs(enemy.pos().y() - camera.y()) < 100){
@@ -128,20 +149,22 @@ namespace fe
             }
             // BN_LOG(_player->hp());
 
+
             if(_player->pos().y() == 152 && _player->pos().x() > 870){
-                _player->set_healthbar_visibility(false);
-                scale_action = bn::sprite_scale_to_action(glow, 60, 2);
-                map.set_blending_enabled(true);
-                bg.set_blending_enabled(true);
-                glow.set_blending_enabled(true);
-                intensity_action = bn::blending_fade_alpha_to_action(60, 1);
+                if(enemy_count < 1){
+                    _player->set_healthbar_visibility(false);
+                    scale_action = bn::sprite_scale_to_action(glow, 60, 2);
+                    map.set_blending_enabled(true);
+                    bg.set_blending_enabled(true);
+                    glow.set_blending_enabled(true);
+                    intensity_action = bn::blending_fade_alpha_to_action(60, 1);
+                }
             }
 
             if(scale_action.has_value()){
                 if(!scale_action.value().done()){
                     scale_action.value().update();
                 } 
-                
             }
 
             if(intensity_action.has_value()){

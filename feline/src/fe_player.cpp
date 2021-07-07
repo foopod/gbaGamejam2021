@@ -146,7 +146,7 @@ namespace fe
         _camera.reset();
         _map.reset();
         _map_cells.reset();
-        // _camera.reset();
+        _enemies.reset();
     }
 
     void Player::reset(){
@@ -155,7 +155,7 @@ namespace fe
         _sprite.put_above();
         _text_bg1.set_camera(_camera);
         _text_bg2.set_camera(_camera);
-        _tele_sprite.set_visible(true);
+        _tele_sprite.set_visible(false);
         _tele_sprite.set_camera(_camera);
         _update_camera(1);
         _dy = 0;
@@ -215,14 +215,20 @@ namespace fe
                 attack_hitbox.set_x(_pos.x() + 8);
             }
             
-            for(int i = 0; i < _enemies->size(); i++)
+            for(int i = 0; i < _enemies.value()->size(); i++)
             {
-                if(_enemies->at(i).is_hit(attack_hitbox))
+                if(_enemies.value()->at(i).is_hit(attack_hitbox))
                 {
                     if(_sprite.horizontal_flip()){
-                        _enemies->at(i).damage_from_left(1);
+                        _enemies.value()->at(i).damage_from_left(1);
+                        if(_enemies.value()->at(i).type() == ENEMY_TYPE::SLIMEO){
+                            _dx +=1;
+                        }
                     } else {
-                        _enemies->at(i).damage_from_right(1);
+                        _enemies.value()->at(i).damage_from_right(1);
+                        if(_enemies.value()->at(i).type() == ENEMY_TYPE::SLIMEO){
+                            _dx -=1;
+                        }
                     }
                     
                 }
@@ -233,9 +239,9 @@ namespace fe
 
     void Player::collide_with_enemies(){
         Hitbox collide_hitbox = Hitbox(_pos.x(),_pos.y()+2, 8, 12);
-        for(int i = 0; i < _enemies->size(); i++)
+        for(int i = 0; i < _enemies.value()->size(); i++)
         {
-            if(_enemies->at(i).is_hit(collide_hitbox))
+            if(_enemies.value()->at(i).is_hit(collide_hitbox))
             {
                 if(!_invulnerable){
                     _invulnerable = true;
@@ -425,12 +431,13 @@ namespace fe
             attack();
         } 
 
-        // attack
+        // teleport
         if(bn::keypad::l_pressed() && !_listening)
         {
             if(_can_teleport && _healthbar.is_glow_ready()){
                 BN_LOG(_tele_sprite.position().x());
                 _tele_sprite.set_position(_pos);
+                _tele_sprite.set_visible(true);
                 _tele_sprite.set_horizontal_flip(!is_right());
                 _healthbar.activate_glow();
                 bn::sound_items::teleport.play();

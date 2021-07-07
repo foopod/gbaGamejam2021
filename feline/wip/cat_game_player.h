@@ -1,2 +1,0 @@
-#ifndef CAT_GAME_PLAYER_H
-#define CAT_GAME_PLAYER_H

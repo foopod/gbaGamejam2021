@@ -110,7 +110,6 @@ namespace fe
         enemies.push_back(Enemy(711, 224, camera, map, ENEMY_TYPE::SLIME, 2));
         enemies.push_back(Enemy(710, 348, camera, map, ENEMY_TYPE::BAT, 1));
         enemies.push_back(Enemy(412, 440, camera, map, ENEMY_TYPE::SLIME, 2));
-        enemies.push_back(Enemy(827, 744, camera, map, ENEMY_TYPE::WALL, 10));
         enemies.push_back(Enemy(922, 720, camera, map, ENEMY_TYPE::BAT, 1));
         enemies.push_back(Enemy(337, 792, camera, map, ENEMY_TYPE::SLIME, 2));
         // enemies.push_back(Enemy(885, 936, camera, map, ENEMY_TYPE::BOSS, 10));

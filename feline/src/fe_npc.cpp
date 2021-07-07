@@ -42,6 +42,11 @@ namespace fe
             _action = bn::create_sprite_animate_action_forever(
                             _sprite.value(), 20, bn::sprite_items::penguin_sprite.tiles_item(), 0,1);
             _lines = bn::span(_penguin_lines);
+        } else if(_type == NPC_TYPE::PENGUIN2){
+            _sprite = bn::sprite_items::penguin_sprite.create_sprite(_pos.x(), _pos.y());
+            _action = bn::create_sprite_animate_action_forever(
+                            _sprite.value(), 20, bn::sprite_items::penguin_sprite.tiles_item(), 0,1);
+            _lines = bn::span(_penguin_lines2);
         }else if(_type == NPC_TYPE::TABLET){
             _sprite = bn::sprite_items::stone_plaque.create_sprite(_pos.x(), _pos.y());
             _action = bn::create_sprite_animate_action_forever(
@@ -51,7 +56,7 @@ namespace fe
         else if(_type == NPC_TYPE::CAGE){
             _sprite = bn::sprite_items::cage.create_sprite(_pos.x(), _pos.y());
             _action = bn::create_sprite_animate_action_forever(
-                            _sprite.value(), 10, bn::sprite_items::cage.tiles_item(), 0,1);
+                            _sprite.value(), 120, bn::sprite_items::cage.tiles_item(), 0,1);
             _lines = bn::span(_cage_lines);
         }
         _sprite.value().set_camera(_camera);

@@ -10,6 +10,7 @@
 #include "bn_keypad.h"
 #include "bn_sprite_items_bat_sprite.h"
 #include "bn_sprite_items_slime_sprite.h"
+#include "bn_sprite_items_slime_sprite_2.h"
 #include "bn_sprite_items_child.h"
 #include "bn_sprite_items_wall.h"
 #include "bn_sprite_items_box.h"
@@ -98,6 +99,12 @@ namespace fe
             _sprite.value().set_bg_priority(1);
             _action = bn::create_sprite_animate_action_forever(
                              _sprite.value(), 20, bn::sprite_items::slime_sprite.tiles_item(), 0,1,0,1);
+        } else if (_type == ENEMY_TYPE::SLIMEO){
+            _sprite = bn::sprite_items::slime_sprite_2.create_sprite(_pos.x(), _pos.y());
+            _sprite.value().set_camera(_camera);
+            _sprite.value().set_bg_priority(1);
+            _action = bn::create_sprite_animate_action_forever(
+                             _sprite.value(), 20, bn::sprite_items::slime_sprite_2.tiles_item(), 0,1,0,1);
         }
          else if (_type == ENEMY_TYPE::WALL){
             _sprite = bn::sprite_items::wall.create_sprite(_pos.x(), _pos.y());
@@ -123,12 +130,11 @@ namespace fe
     }
 
     bool Enemy::damage_from_left(int damage){
-        if(_type == ENEMY_TYPE::BOSS){
-            _dy-=0.2;
-            _dx-=0.2;
-        } else if(_type != ENEMY_TYPE::WALL){
+        if(_type == ENEMY_TYPE::BOSS && !_invulnerable){
+            teleport();
+        } else if(_type == ENEMY_TYPE::SLIMEO){
             _dy-=0.4;
-            _dx-=1;
+            // _dx-=1;
         }
         _dir = 1;
         _direction_timer = 0;
@@ -138,9 +144,8 @@ namespace fe
     }
 
     bool Enemy::damage_from_right(int damage){
-        if(_type == ENEMY_TYPE::BOSS){
-            _dy-=0.2;
-            _dx+=0.2;
+        if(_type == ENEMY_TYPE::BOSS && !_invulnerable){
+            teleport();
         } else if(_type != ENEMY_TYPE::WALL){
             _dy-=0.4;
             _dx+=1;
@@ -150,6 +155,38 @@ namespace fe
         _grounded = false;
         _sprite.value().set_horizontal_flip(false);
         return _take_damage(damage);
+    }
+
+    void Enemy::teleport(){
+        bool pos_found = false;
+        bool right = !_sprite.value().horizontal_flip();
+
+        int x = 12;
+        
+        while(!pos_found){
+            if(right){
+                pos_found = _fall_check(_pos.x() + x*8 , _pos.y());
+            }else {
+                pos_found = _fall_check(_pos.x() - x*8 , _pos.y());
+            }
+            if(!pos_found){
+                --x;
+                if(x < -12){
+                    pos_found = true;
+                }
+            } 
+        }
+        boss_tele_timer = 0;
+        bn::sound_items::teleport.play();
+        if(right){
+            _pos.set_x(_pos.x() +x*8);
+        } else {
+            _pos.set_x(_pos.x() -x*8);
+        }
+        _dx = 0;
+        _dir = -_dir;
+        _direction_timer = 0;
+        _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
     }
 
     bool Enemy::_take_damage(int damage){
@@ -162,6 +199,11 @@ namespace fe
                 if(_type == ENEMY_TYPE::SLIME){
                     _action = bn::create_sprite_animate_action_once(
                         _sprite.value(), 5, bn::sprite_items::slime_sprite.tiles_item(), 2,3,3,3);
+                }
+                else if (_type == ENEMY_TYPE::SLIMEO)
+                {
+                    _action = bn::create_sprite_animate_action_once(
+                        _sprite.value(), 5, bn::sprite_items::slime_sprite_2.tiles_item(), 2,3,3,3);
                 }
                 else if (_type == ENEMY_TYPE::BAT)
                 {
@@ -219,7 +261,6 @@ namespace fe
             return false;
         }
     }
-
 
     bool Enemy::_will_fall(){
         if(_type == ENEMY_TYPE::BOSS){
@@ -287,7 +328,7 @@ namespace fe
                 _dy += gravity;
             }
 
-            if(_type == ENEMY_TYPE::SLIME || _type == ENEMY_TYPE::BOSS){
+            if(_type == ENEMY_TYPE::SLIME || _type == ENEMY_TYPE::SLIMEO || _type == ENEMY_TYPE::BOSS){
                 if(!_invulnerable && _grounded && _direction_timer > 30){
                     if(_will_fall() || _will_hit_wall()){
                         _dx = 0;
@@ -296,9 +337,13 @@ namespace fe
                         _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
                     }
                 }
-                if(_type == ENEMY_TYPE::SLIME){
+                if(_type == ENEMY_TYPE::SLIME || _type == ENEMY_TYPE::SLIMEO){
                     if((_action.value().current_index() == 1 || _action.value().current_index() == 3)  && !_invulnerable && _grounded){
-                        _dx += _dir*acc;
+                        if(_type == ENEMY_TYPE::SLIME){
+                            _dx += _dir*acc;
+                        } else {
+                            _dx += _dir*acc*1.5;
+                        }
                         if(_sound_timer > 20){
                             bn::sound_items::slime.play(0.3);
                             _sound_timer = 0;
@@ -308,36 +353,49 @@ namespace fe
                     }
                 } else {
                     if(player_pos.y() - 8 == _pos.y()){
-                        if(player_pos.x() < _pos.x() && !_sprite.value().horizontal_flip()){
+                        if(player_pos.x() < _pos.x() && bn::abs(player_pos.x() - _pos.x()) > 8 && !_sprite.value().horizontal_flip()){
                             _dx = 0;
                             _dir = -_dir;
                             _direction_timer = 0;
                             _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
-                        } else if(player_pos.x() > _pos.x() && _sprite.value().horizontal_flip()){
+                        } else if(player_pos.x() > _pos.x() && bn::abs(player_pos.x() - _pos.x()) < 8 && _sprite.value().horizontal_flip()){
                             _dx = 0;
                             _dir = -_dir;
                             _direction_timer = 0;
                             _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
                         }
-                        if(bn::abs(player_pos.x() - _pos.x()) < 80 && bn::abs(player_pos.x() - _pos.x()) > 16 && boss_tele_timer > 60){
-                            bn::fixed diff = player_pos.x() - _pos.x();
-                            if(_fall_check(_pos.x() + diff*2, _pos.y()) && _hp>0){
+                        if(bn::abs(player_pos.x() - _pos.x()) < 100 && bn::abs(player_pos.x() - _pos.x()) > 16 && boss_tele_timer > 60){
+                            // bn::fixed diff = player_pos.x() - _pos.x();
+                            if(_fall_check(player_pos.x(), _pos.y()) && _hp>0 && !_target_locked){
+                                _target.set_x(player_pos.x());
+                                _target.set_y(player_pos.y() - 8);
+                                _target_locked = true;
+                                _invulnerable = true;
                                 boss_tele_timer = 0;
-                                bn::sound_items::teleport.play();
-                                _pos.set_x(_pos.x() + diff*2);
-                                _dx = 0;
-                                _dir = -_dir;
-                                _direction_timer = 0;
-                                _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
+                                _action = bn::create_sprite_animate_action_forever(
+                                    _sprite.value(), 20, bn::sprite_items::child.tiles_item(), 9,9,9,9);
                             }
-                            
                         } else {
                             ++boss_tele_timer;
+                            if(_target_locked && boss_tele_timer > 30){
+                                boss_tele_timer = 0;
+                                _target_locked = false;
+                                _pos.set_x(_target.x());
+                                _pos.set_y(_target.y());
+                                bn::sound_items::teleport.play();
+                                _dx = 0;
+                                _invulnerable = false;
+                                _dir = -_dir;
+                                _direction_timer = 0;
+                                _action = bn::create_sprite_animate_action_forever(
+                                        _sprite.value(), 5, bn::sprite_items::child.tiles_item(), 1,2,3,4);
+                            }
+                            
                         }
                     } 
                     
                     if(!_invulnerable && _grounded){
-                        _dx += _dir*acc/2;
+                        _dx += _dir*acc;
                     }
                 }
                 

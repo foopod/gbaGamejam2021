@@ -87,22 +87,18 @@ namespace fe
 
         //Enemies
         bn::vector<Enemy, 16> enemies = {};
-        // enemies.push_back(Enemy(408, 872, camera, map, ENEMY_TYPE::WALL, 100));
-        enemies.push_back(Enemy(734, 808, camera, map, ENEMY_TYPE::SLIME, 2));
-        enemies.push_back(Enemy(734, 680, camera, map, ENEMY_TYPE::SLIME, 2));
-        enemies.push_back(Enemy(254, 568, camera, map, ENEMY_TYPE::SLIME, 2));
-        enemies.push_back(Enemy(244, 440, camera, map, ENEMY_TYPE::SLIME, 2));
-        enemies.push_back(Enemy(660, 408, camera, map, ENEMY_TYPE::SLIME, 2));
-        enemies.push_back(Enemy(750, 408, camera, map, ENEMY_TYPE::SLIME, 2));
-        // enemies.push_back(Enemy(434, 150, camera, map, ENEMY_TYPE::BAT, 1));
-        // enemies.push_back(Enemy(750, 480, camera, map, ENEMY_TYPE::SLIME, 2));
-        // enemies.push_back(Enemy(711, 224, camera, map, ENEMY_TYPE::SLIME, 2));
-        // enemies.push_back(Enemy(710, 348, camera, map, ENEMY_TYPE::BAT, 1));
-        // enemies.push_back(Enemy(412, 440, camera, map, ENEMY_TYPE::SLIME, 2));
-        // enemies.push_back(Enemy(827, 744, camera, map, ENEMY_TYPE::WALL, 10));
-        // enemies.push_back(Enemy(922, 720, camera, map, ENEMY_TYPE::BAT, 1));
-        // enemies.push_back(Enemy(337, 792, camera, map, ENEMY_TYPE::SLIME, 2));
-        // enemies.push_back(Enemy(885, 936, camera, map, ENEMY_TYPE::BOSS, 10));
+        // enemies.push_back(Enemy(408, 872, camera, map, ENEMY_TYPE::WALL,2 100));
+        enemies.push_back(Enemy(734, 808, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(734, 680, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(254, 568, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(244, 440, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(660, 408, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(750, 408, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(400, 608, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(106, 536, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(451, 408, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(852, 336, camera, map, ENEMY_TYPE::SLIMEO, 3));
+        enemies.push_back(Enemy(440, 240, camera, map, ENEMY_TYPE::SLIMEO, 3));
 
         //player
         _player->spawn(spawn_location, camera, map, enemies);
@@ -133,12 +129,6 @@ namespace fe
             //     max_cpu_usage = 0;
             //     counter = 60;
             // }
-
-            if(_player->hp() < 1){
-                _player->delete_data();
-                return Scene::DEATH;
-            }
-            
 
             if(tablet.check_trigger(_player->pos()))
             {
@@ -222,7 +212,13 @@ namespace fe
             
             if(cage.finished_talking()){
                 _player->set_listening(false);
+                _player->delete_data();
                 return Scene::END;
+            }
+
+            if(_player->hp() < 1){
+                _player->delete_data();
+                return Scene::DEATH;
             }
             
             // BN_PROFILER_RESET();

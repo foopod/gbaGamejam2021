@@ -7,6 +7,7 @@
 #include "bn_optional.h"
 #include "bn_span.h"
 #include "bn_string.h"
+#include "bn_random.h"
 #include "bn_string_view.h"
 #include "bn_sprite_animate_actions.h"
 #include "bn_affine_bg_ptr.h"
@@ -39,6 +40,9 @@ namespace fe
             bn::optional<bn::sprite_ptr> _sprite;
             bn::optional<bn::sprite_animate_action<4>> _action;
 
+            bn::fixed_point _target = bn::fixed_point(0,0);
+            bool _target_locked = false;
+
             bn::span<const bn::affine_bg_map_cell> _map_cells;
             bn::affine_bg_ptr _map;
             Level _level;
@@ -54,6 +58,7 @@ namespace fe
             bn::fixed_point pos();
             bool is_hit(Hitbox attack);
             void set_visible(bool visibility);
+            void teleport();
             bool damage_from_left(int damage);
             bool damage_from_right(int damage);
             int hp();

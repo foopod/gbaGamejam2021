@@ -80,6 +80,12 @@ namespace fe
                 "They were heading for the caves!"
             };
 
+            bn::string_view _penguin_lines2[3] = {
+                "Oh good!",
+                "You found buddy.",
+                "Let me know if there is anything I can do."
+            };
+
             bn::string_view _tablet_lines[4] = {
                 "You feel warm",
                 "You feel energized",
