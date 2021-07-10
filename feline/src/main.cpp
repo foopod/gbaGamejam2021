@@ -33,6 +33,8 @@
 #include "fe_scene_gba.h"
 #include "fe_scene_butano.h"
 #include "fe_scene_end.h"
+#include "fe_scene_lab.h"
+#include "fe_scene_lab_after.h"
 #include "fe_scene.h"
 
 #include "bn_sprite_items_cat_sprite.h"
@@ -54,7 +56,7 @@ int main()
         } 
         else if(scene == fe::Scene::HOUSE_SKY){
             fe::Sky sky = fe::Sky(player);
-            scene = sky.execute(bn::fixed_point(153, 208));
+            scene = sky.execute(bn::fixed_point(153, 272));
         } 
         else if(scene == fe::Scene::SKY_DUNGEON)
         {
@@ -64,12 +66,12 @@ int main()
         else if(scene == fe::Scene::DUNGEON_SKY)
         {
             fe::Sky sky = fe::Sky(player);
-            scene = sky.execute(bn::fixed_point(169, 552));
+            scene = sky.execute(bn::fixed_point(169, 616));
         }
         else if(scene == fe::Scene::RETURN_SKY)
         {
             fe::SkyReturn sky_return = fe::SkyReturn(player);
-            scene = sky_return.execute(bn::fixed_point(169, 552));
+            scene = sky_return.execute(bn::fixed_point(169, 616));
         }
         else if(scene == fe::Scene::SKY_HOUSE)
         {
@@ -111,6 +113,16 @@ int main()
         {
             fe::Death death = fe::Death(player);
             scene = death.execute();
+        }
+        else if(scene == fe::Scene::LAB)
+        {
+            fe::Lab lab = fe::Lab(player);
+            scene = lab.execute(bn::fixed_point(61, 344));
+        }
+        else if(scene == fe::Scene::LAB_AFTER)
+        {
+            fe::LabAfter lab_after = fe::LabAfter(player);
+            scene = lab_after.execute(bn::fixed_point(502, 704));
         }
         player.hide();
         if(scene != fe::Scene::DEATH && scene != fe::Scene::BUTANO && scene != fe::Scene::TITLE){

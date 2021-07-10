@@ -49,7 +49,7 @@ namespace fe
         bn::music::set_volume(0.6);
 
         //NPC
-        NPC penguin = NPC(bn::fixed_point(231, 312), camera, NPC_TYPE::PENGUIN, text_generator);
+        NPC penguin = NPC(bn::fixed_point(231, 376), camera, NPC_TYPE::PENGUIN, text_generator);
 
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::cliffs.create_bg(512, 512);
@@ -101,14 +101,14 @@ namespace fe
             if(bn::keypad::up_pressed())
             {
                 if(_player->pos().x() < 185 && _player->pos().x() > 155){
-                    if(_player->pos().y() < 580 && _player->pos().y() > 550){
+                    if(_player->pos().y() < 644 && _player->pos().y() > 614){
                         _player->delete_data();
                         return Scene::SKY_DUNGEON;
                     }
                 }
 
                 if(_player->pos().x() < 170 && _player->pos().x() > 140){
-                    if(_player->pos().y() < 230 && _player->pos().y() > 200){
+                    if(_player->pos().y() < 294 && _player->pos().y() > 264){
                         _player->delete_data();
                         return Scene::SKY_HOUSE;
                     }

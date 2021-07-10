@@ -91,11 +91,13 @@ namespace fe
         bn::fixed start_y = 20;
         bn::fixed start_amp = 0;
 
+        int timer = 0;
 
-        while(! bn::keypad::any_pressed())
+        while(!(bn::keypad::any_pressed() && timer > 120))
         {
             // cat_sprite.set_x(cat_sprite.x() + 1.3);
 
+            ++timer;
             layer_1 = loop(layer_1, 0.3);
             layer_2 = loop(layer_2, 0.2);
             layer_3 = loop(layer_3, 0.1);

@@ -9,8 +9,17 @@ namespace fe
         PENGUIN,
         PENGUIN2,
         TORTOISE,
+        TORTOISE2,
         TABLET,
-        CAGE
+        JEREMY,
+        CAGE,
+        FROG,
+        GIRLS,
+        LAB_PC,
+        POTION,
+        COMPUTER_STUFF,
+        PEWPEW,
+        FAM
     };
 }
 

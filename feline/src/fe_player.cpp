@@ -13,6 +13,7 @@
 
 #include "bn_sprite_items_cat_sprite.h"
 #include "bn_sprite_items_text_bg.h"
+#include "bn_sprite_items_skip.h"
 #include "bn_sprite_items_spin_glow.h"
 
 #include "fe_hitbox.h"
@@ -89,6 +90,7 @@ namespace fe
         _map(bn::affine_bg_items::house.create_bg(0, 0)),
         _text_bg1(bn::sprite_items::text_bg.create_sprite(0, 0)),
         _text_bg2(bn::sprite_items::text_bg.create_sprite(0, 0)),
+        _skip(bn::sprite_items::skip.create_sprite(0, 0)),
         _healthbar(fe::Healthbar()),
         _data(fe::Data()),
         _tele_sprite(bn::sprite_items::cat_sprite.create_sprite(0, 0))
@@ -112,6 +114,9 @@ namespace fe
         _text_bg2.set_bg_priority(0);
         _text_bg2.put_above();
         _text_bg2.set_visible(false);
+        _skip.set_bg_priority(0);
+        _skip.put_above();
+        _skip.set_visible(false);
     }
 
     void Player::set_can_teleport(bool can_teleport){
@@ -155,11 +160,13 @@ namespace fe
         _sprite.put_above();
         _text_bg1.set_camera(_camera);
         _text_bg2.set_camera(_camera);
+        _skip.set_camera(_camera);
         _tele_sprite.set_visible(false);
         _tele_sprite.set_camera(_camera);
         _update_camera(1);
+        _sprite.set_horizontal_flip(false);
         _dy = 0;
-        _dy = 0;
+        _dx = 0;
         _jumping = false;
         _falling = false;
         _running = false;
@@ -180,6 +187,7 @@ namespace fe
         _listening = is_listening;
         _text_bg1.set_visible(_listening);
         _text_bg2.set_visible(_listening);
+        _skip.set_visible(_listening);
     }
 
     bool Player::is_listening()
@@ -187,11 +195,28 @@ namespace fe
         return _listening;
     }
 
-    void Player::jump()
+    void Player::jump(bn::affine_bg_ptr map, fe::Level level)
     {
-        if(_grounded && !_listening){
-            _dy-= jump_power;
-            _grounded = false;
+        if(!_listening){
+            if(_grounded && !_listening){
+                _dy-= jump_power;
+                _grounded = false;
+            } else if(_can_teleport && _healthbar.is_glow_ready()){
+                _tele_sprite.set_position(_pos);
+                _tele_sprite.set_visible(true);
+                _tele_sprite.set_horizontal_flip(!is_right());
+                _healthbar.activate_glow();
+                bn::sound_items::teleport.play();
+                int dist_up = 80;
+                _dy = -1;
+                for(int index = 80; index > 0; index-=4){
+                    if(check_collisions_map(bn::fixed_point(_pos.x(), _pos.y() - index), up,_hitbox_jump, map, level, _map_cells.value())){
+                        dist_up = index-4;
+                    }
+                }
+                _pos.set_y(_pos.y() - dist_up);
+            }
+
         }
     }
 
@@ -217,7 +242,7 @@ namespace fe
             
             for(int i = 0; i < _enemies.value()->size(); i++)
             {
-                if(_enemies.value()->at(i).is_hit(attack_hitbox) && _enemies.value()->at(i).is_vulnerable())
+                if(_enemies.value()->at(i).is_vulnerable() && _enemies.value()->at(i).is_hit(attack_hitbox))
                 {
                     if(_sprite.horizontal_flip()){
                         _enemies.value()->at(i).damage_from_left(1);
@@ -241,9 +266,12 @@ namespace fe
         Hitbox collide_hitbox = Hitbox(_pos.x(),_pos.y()+2, 8, 12);
         for(int i = 0; i < _enemies.value()->size(); i++)
         {
-            if(_enemies.value()->at(i).is_hit(collide_hitbox))
+            if(_enemies.value()->at(i).type() == ENEMY_TYPE::MUTANT && _enemies.value()->at(i).is_vulnerable()){
+                // mutant cat boss is sleeping
+            }
+            else if(_enemies.value()->at(i).is_hit(collide_hitbox))
             {
-                if(!_invulnerable && _enemies.value()->at(i).hp() > 0){
+                if(!_invulnerable && _enemies.value()->at(i).hp() > 0 && _enemies.value()->at(i).type() != ENEMY_TYPE::RAT){
                     _invulnerable = true;
                     _healthbar.set_hp(_healthbar.hp() - 1);
                     _dy -= 0.3;
@@ -375,10 +403,12 @@ namespace fe
             }            
         }
 
-        if(_pos.y() < 942){
-            _camera.value().set_y(_camera.value().y()+ (_pos.y()-10-_camera.value().y()) /lerp);
-        } else {
+        if(_pos.y() > 942){
             _camera.value().set_y(_camera.value().y()+(942-_camera.value().y()) /lerp);
+        } else if(_pos.y() < 90){
+            _camera.value().set_y(_camera.value().y()+(90-_camera.value().y()) /lerp);
+        } else {
+            _camera.value().set_y(_camera.value().y()+ (_pos.y()-10-_camera.value().y()) /lerp);
         }
     }
 
@@ -417,12 +447,13 @@ namespace fe
         if(_listening){
             _text_bg1.set_position(_camera.value().x()+64+8, _camera.value().y() + 40+24);
             _text_bg2.set_position(_camera.value().x()-64+8, _camera.value().y() + 40+24);
+            _skip.set_position(_camera.value().x()+64+8+16, _camera.value().y() + 40+24-18);
         }
 
         // jump
         if(bn::keypad::a_pressed() && !_listening)
         {
-            jump();
+            jump(map, level);
         } 
 
         // attack

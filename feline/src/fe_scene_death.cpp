@@ -53,7 +53,7 @@ namespace fe
         text_generator.set_center_alignment();
 
 
-        text_generator.generate(0, 30, "Cat's only have nine lives.", text_sprites);
+        text_generator.generate(0, 30, "Cats only have nine lives.", text_sprites);
 
 
         // player sprite

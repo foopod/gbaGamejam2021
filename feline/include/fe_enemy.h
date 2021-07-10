@@ -37,8 +37,11 @@ namespace fe
             int _inv_timer = 0;
             bool _stunned = false;
             int _sound_timer = 0;
+            bool _spotted_player = false;
             bn::optional<bn::sprite_ptr> _sprite;
             bn::optional<bn::sprite_animate_action<4>> _action;
+
+            bn::optional<bn::sprite_animate_action<10>> _mutant_action;
 
             bn::fixed_point _target = bn::fixed_point(0,0);
             bool _target_locked = false;
@@ -62,6 +65,7 @@ namespace fe
             void teleport();
             bool damage_from_left(int damage);
             bool damage_from_right(int damage);
+            bool spotted_player();
             int hp();
             ENEMY_TYPE type();
     };

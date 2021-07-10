@@ -30,6 +30,7 @@ namespace fe
             bn::optional<bn::camera_ptr> _camera;
             bn::sprite_ptr _text_bg1;
             bn::sprite_ptr _text_bg2;
+            bn::sprite_ptr _skip;
             fe::Healthbar _healthbar;
 
             //used for state management
@@ -73,7 +74,7 @@ namespace fe
             
             [[nodiscard]] bn::fixed_point pos();
 
-            void jump();
+            void jump(bn::affine_bg_ptr map, fe::Level level);
             void attack();
             void collide_with_objects(bn::affine_bg_ptr map, fe::Level level);
             void collide_with_enemies();

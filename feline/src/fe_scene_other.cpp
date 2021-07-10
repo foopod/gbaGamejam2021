@@ -172,6 +172,7 @@ namespace fe
                     intensity_action.value().update();
                     kill_timer++;
                     if(kill_timer > 60){
+                        bn::blending::set_fade_alpha(0);
                         _player->delete_data();
                         return Scene::OTHER_DUNGEON;
                     }

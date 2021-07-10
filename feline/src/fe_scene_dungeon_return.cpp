@@ -109,8 +109,7 @@ namespace fe
         NPC tablet = NPC(bn::fixed_point(300, 872), camera, NPC_TYPE::TABLET, text_generator);
         NPC cage = NPC(bn::fixed_point(254, 208), camera, NPC_TYPE::CAGE, text_generator);
         Tooltip explain_teleport = Tooltip(bn::fixed_point(420, 880),"Tap 'L' to Teleport", text_generator);
-        Tooltip explain_recharge = Tooltip(bn::fixed_point(445, 880),"It takes some time to recharge though.", text_generator);
-
+        
         // bn::vector<StorySave, 4> saves = {};
         // saves.push_back(StorySave(bn::fixed_point(323, 232), STORY_TYPE::FIRST, camera, text_generator));
         // saves.push_back(StorySave(bn::fixed_point(913, 488), STORY_TYPE::SECOND, camera, text_generator));
@@ -151,10 +150,6 @@ namespace fe
             else if(explain_teleport.check_trigger(_player->pos())){
                 _player->set_listening(true);
                 explain_teleport.update();
-            }
-            else if(explain_recharge.check_trigger(_player->pos())){
-                _player->set_listening(true);
-                explain_recharge.update();
             }
             else {
                 _player->set_listening(false);
@@ -198,22 +193,11 @@ namespace fe
 
             //  BN_LOG(bn::to_string<32>(_player->pos().x())+" " + bn::to_string<32>(_player->pos().y()));
             vines.value().set_position(bn::fixed_point((_player->pos().x()-100)/10,(_player->pos().y())/10));
-
-            //door
-            if(bn::keypad::up_pressed() && !_player->is_listening())
-            {
-                if(_player->pos().x() < 160 && _player->pos().x() > 140){
-                    if(_player->pos().y() < 200 && _player->pos().y() > 188){
-                        return Scene::DUNGEON_SKY;
-                    }
-                }
-
-            }
             
             if(cage.finished_talking()){
                 _player->set_listening(false);
                 _player->delete_data();
-                return Scene::END;
+                return Scene::RETURN_SKY;
             }
 
             if(_player->hp() < 1){

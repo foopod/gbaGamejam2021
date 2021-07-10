@@ -19,6 +19,8 @@ namespace fe
         DEATH,
         LOADING,
         TITLE,
+        LAB,
+        LAB_AFTER,
         END
     };
 }

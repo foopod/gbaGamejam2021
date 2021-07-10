@@ -103,6 +103,89 @@ namespace fe
                 "Come on Dad, Let's Go!",
             };
 
+            bn::string_view _jeremy_lines[15] = {
+                "Damnit",
+                "Those Bastards!",
+                "What's the plan?",
+                "...",
+                "Well you know I can't do that",
+                "No!",
+                "Look. I want to help. I do.",
+                "I would do anything.",
+                "But I won't do that.",
+                "Take the airship. But I can't come with you."
+                "...",
+                "Good Luck boys!",
+                "Oh..",
+                "And here.. take some of my lives.",
+                "You are going to need them more than me."
+            };
+            
+            bn::string_view _tortoise2_lines[9] = {
+                "Sorry boys",
+                "This is a police investigation.",
+                "Oh hey, it's you.",
+                "We have locked down the crime scene",
+                "And we are doing a thorough inverstigation",
+                "...",
+                "What? You know where they are?!?!",
+                "No! Don't go there.",
+                "The tortoise brigade is on the case."
+            };
+
+            bn::string_view _frog_lines[4] = {
+                "Ribbit",
+                "Did you see who knocked over my crates?",
+                "...",
+                "Hm... Well if you do. Let me know.",
+            };
+
+            bn::string_view _girls_lines[4] = {
+                "My..",
+                "My goodness..",
+                "What are they doing to you?",
+                "I have to get to the bottom of this",
+            };
+
+            bn::string_view _lab_pc_lines[8] = {
+                "They are..",
+                "No.. They..",
+                "...",
+                "They are experimenting on cats.",
+                "By modifying DNA, they are...",
+                "No.. They can't..",
+                "I have to get the kids out of here",
+                "I have to find Eileen",
+            };
+
+            bn::string_view _potion_lines[2] = {
+                "Ew.. What is that?",
+                "I should probably just leave it be.",
+            };
+
+            bn::string_view _computers_lines[1] = {
+                "I wonder what they need all this for?",
+            };
+
+            bn::string_view _pewpew_lines[6] = {
+                "They left this one unlocked",
+                "Oooohh...",
+                "It has Space Invaders",
+                "pew pew",
+                "pew pew ... pew",
+                "pew"
+            };
+
+            bn::string_view _fam_lines[7] = {
+                "Eileen!",
+                "Thank goodness you are okay",
+                "That was horrifying",
+                "I was so scared that I had lost you",
+                "All of you!",
+                "...",
+                "Let's get the others and get out of here",
+            };
+
         public:
             NPC(bn::fixed_point pos, bn::camera_ptr& camera, NPC_TYPE type, bn::sprite_text_generator& text_generator);
             void update();

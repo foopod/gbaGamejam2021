@@ -59,7 +59,7 @@ namespace fe
         text_generator.set_bg_priority(0);
         text_generator.set_center_alignment();
 
-        text_generator.generate(-90, -60, "Chapter 1", text_sprites);
+        // text_generator.generate(-90, -60, "Chapter 1", text_sprites);
 
         // player sprite
         bn::sprite_ptr cat_sprite = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y());

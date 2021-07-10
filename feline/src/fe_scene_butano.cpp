@@ -24,7 +24,6 @@
 //assets
 #include "bn_sprite_items_butano.h"
 #include "bn_affine_bg_items_gbajam_splash.h"
-#include "bn_affine_bg_items_butano_background.h"
 
 #include "bn_music_items.h"
 

@@ -8,11 +8,14 @@
 #include "bn_log.h"
 #include "bn_display.h"
 #include "bn_keypad.h"
+#include "bn_random.h"
 #include "bn_sprite_items_bat_sprite.h"
 #include "bn_sprite_items_slime_sprite.h"
+#include "bn_sprite_items_mutant.h"
 #include "bn_sprite_items_slime_sprite_2.h"
 #include "bn_sprite_items_child.h"
 #include "bn_sprite_items_wall.h"
+#include "bn_sprite_items_rat.h"
 #include "bn_sprite_items_box.h"
 #include "bn_affine_bg_map_ptr.h"
 
@@ -77,6 +80,14 @@ namespace fe
     constexpr const bn::fixed friction = 0.85;
 
     int boss_tele_timer;
+    int jump_timer = 0;
+    int time_to_jump = 180;
+    bool is_tired = false;
+    int time_to_sleep = 600;
+    int sleep_timer = 0;
+    
+
+    bn::random random = bn::random();
 
     Enemy::Enemy(int x, int y, bn::camera_ptr camera, bn::affine_bg_ptr map, ENEMY_TYPE type, int hp) :
         _pos(x, y), _camera(camera), _type(type), _hp(hp), _map(map), _level(Level(map))
@@ -120,6 +131,20 @@ namespace fe
             _action = bn::create_sprite_animate_action_forever(
                              _sprite.value(), 20, bn::sprite_items::child.tiles_item(), 1,2,3,4);
         }
+        else if (_type == ENEMY_TYPE::RAT){
+            _sprite = bn::sprite_items::rat.create_sprite(_pos.x(), _pos.y());
+            _sprite.value().set_camera(_camera);
+            _sprite.value().set_bg_priority(1);
+            _action = bn::create_sprite_animate_action_forever(
+                             _sprite.value(), 20, bn::sprite_items::rat.tiles_item(), 0,1,2,3);
+        }
+        else if (_type == ENEMY_TYPE::MUTANT){
+            _sprite = bn::sprite_items::mutant.create_sprite(_pos.x(), _pos.y());
+            _sprite.value().set_camera(_camera);
+            _sprite.value().set_bg_priority(1);
+            _mutant_action = bn::create_sprite_animate_action_forever(
+                             _sprite.value(), 2, bn::sprite_items::mutant.tiles_item(), 3,4,5,6,7,8,9,10,11,12);
+        }
         _sprite.value().set_visible(true);
 
         
@@ -130,34 +155,47 @@ namespace fe
     }
 
     bool Enemy::is_vulnerable(){
-        return !_invulnerable;
+        if(_type == ENEMY_TYPE::MUTANT){
+            return is_tired;
+        } else {
+            return !_invulnerable; 
+        }
     }
 
     bool Enemy::damage_from_left(int damage){
-        if(_type == ENEMY_TYPE::BOSS && !_invulnerable){
-            teleport();
-        } else if(_type == ENEMY_TYPE::SLIMEO){
-            _dy-=0.4;
-            // _dx-=1;
+        if(_type != ENEMY_TYPE::MUTANT){
+            if(_type == ENEMY_TYPE::BOSS && !_invulnerable){
+                teleport();
+            } else if(_type == ENEMY_TYPE::SLIMEO){
+                _dy-=0.4;
+                // _dx-=1;
+            } else {
+                _dy-=0.4;
+                _dx-=1;
+            }
+            _dir = 1;
+            _direction_timer = 0;
+            _grounded = false;
+            _sprite.value().set_horizontal_flip(true);
         }
-        _dir = 1;
-        _direction_timer = 0;
-        _grounded = false;
-        _sprite.value().set_horizontal_flip(true);
         return _take_damage(damage);
     }
 
     bool Enemy::damage_from_right(int damage){
-        if(_type == ENEMY_TYPE::BOSS && !_invulnerable){
-            teleport();
-        } else if(_type == ENEMY_TYPE::SLIMEO){
-            _dy-=0.4;
-            // _dx+=1;
+        if(_type != ENEMY_TYPE::MUTANT){
+            if(_type == ENEMY_TYPE::BOSS && !_invulnerable){
+                teleport();
+            } else if(_type == ENEMY_TYPE::SLIMEO){
+                _dy-=0.4;
+            } else {
+                _dy-=0.4;
+                _dx+=1;
+            }
+            _dir = -1;
+            _direction_timer = 0;
+            _grounded = false;
+            _sprite.value().set_horizontal_flip(false);
         }
-        _dir = -1;
-        _direction_timer = 0;
-        _grounded = false;
-        _sprite.value().set_horizontal_flip(false);
         return _take_damage(damage);
     }
 
@@ -194,10 +232,14 @@ namespace fe
     }
 
     bool Enemy::_take_damage(int damage){
-        if(!_invulnerable)
+        if(!_invulnerable || (_type == ENEMY_TYPE::MUTANT && !is_tired))
         {
             _hp -= damage;
             _invulnerable = true;
+            if(_type == ENEMY_TYPE::MUTANT){
+                _mutant_action = bn::create_sprite_animate_action_once(
+                        _sprite.value(), 4, bn::sprite_items::mutant.tiles_item(), 17,17,17,17,17,17,17,17,17,17);
+            }
             if(_hp <= 0){
                 bn::sound_items::death.play();
                 if(_type == ENEMY_TYPE::SLIME){
@@ -224,6 +266,11 @@ namespace fe
                     _action = bn::create_sprite_animate_action_once(
                         _sprite.value(), 5, bn::sprite_items::wall.tiles_item(), 2,2,3,3);
                 }
+                else if (_type == ENEMY_TYPE::RAT)
+                {
+                    _action = bn::create_sprite_animate_action_once(
+                        _sprite.value(), 10, bn::sprite_items::rat.tiles_item(), 4,5,6,7);
+                }
                 
                 return true;
             }
@@ -236,6 +283,8 @@ namespace fe
         if(!_dead){
             if(_type == ENEMY_TYPE::BOSS){
                 return check_collisions_bb(attack, _pos.x(), _pos.y(), 8, 16);
+            } else if(_type == ENEMY_TYPE::MUTANT){
+                return check_collisions_bb(attack, _pos.x(), _pos.y()+16, 50, 32);
             } else {
                 return check_collisions_bb(attack, _pos.x(), _pos.y(), 8, 8);
             }
@@ -257,6 +306,7 @@ namespace fe
         return false;
     }
 
+    //boss for teleporting
     bool Enemy::_fall_check(bn::fixed x, bn::fixed y)
     {  
         if(_check_collisions_map(bn::fixed_point(x, y), Hitbox(0,16,4,9), directions::down, _map, _level, _map_cells)){
@@ -274,6 +324,16 @@ namespace fe
                 }
             } else { //right
                 if(!_check_collisions_map(_pos, Hitbox(4,16,4,8), directions::down, _map, _level, _map_cells)){
+                    return true;
+                }
+            }
+        } else if(_type == ENEMY_TYPE::MUTANT){
+            if(_dx < 0){ // left
+                if(!_check_collisions_map(_pos, Hitbox(-16,32,4,8), directions::down, _map, _level, _map_cells)){
+                    return true;
+                }
+            } else { //right
+                if(!_check_collisions_map(_pos, Hitbox(16,32,4,8), directions::down, _map, _level, _map_cells)){
                     return true;
                 }
             }
@@ -300,6 +360,10 @@ namespace fe
         return _hp;
     }
 
+    bool Enemy::spotted_player(){
+        return _spotted_player;
+    }
+
     ENEMY_TYPE Enemy::type(){
         return _type;
     }
@@ -313,7 +377,7 @@ namespace fe
             }
 
             // dead check
-            if(_action.value().done()){
+            if(_action.has_value() && _action.value().done()){
                 _sprite.value().set_visible(false);
                 _dead = true;
             }
@@ -332,9 +396,33 @@ namespace fe
                 _dy += gravity;
             }
 
-            if(_type == ENEMY_TYPE::SLIME || _type == ENEMY_TYPE::SLIMEO || _type == ENEMY_TYPE::BOSS){
-                if(!_invulnerable && _grounded && _direction_timer > 30){
+            // Labrat spot player
+            if(_type == ENEMY_TYPE::RAT){
+                //left
+                if(_sprite.value().horizontal_flip()){
+                    if(check_collisions_bb(Hitbox(_pos.x() -40, _pos.y(), 80, 8), player_pos.x(), player_pos.y(), 16,8)){
+                        _spotted_player = true;
+                    }
+                } 
+                else //right
+                {
+                    if(check_collisions_bb(Hitbox(_pos.x() +40, _pos.y(), 80, 8), player_pos.x(), player_pos.y(), 16,8)){
+                        _spotted_player = true;
+                    }
+                }
+                
+            }
+
+            if(_type == ENEMY_TYPE::SLIME || _type == ENEMY_TYPE::SLIMEO || _type == ENEMY_TYPE::RAT || _type == ENEMY_TYPE::BOSS || _type == ENEMY_TYPE::MUTANT){
+                if(!_invulnerable && _grounded && _direction_timer > 30 && _type != ENEMY_TYPE::MUTANT){
                     if(_will_fall() || _will_hit_wall()){
+                        _dx = 0;
+                        _dir = -_dir;
+                        _direction_timer = 0;
+                        _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
+                    }
+                } else if (!_invulnerable && _direction_timer > 80 && _type == ENEMY_TYPE::MUTANT){
+                    if(_will_hit_wall()){
                         _dx = 0;
                         _dir = -_dir;
                         _direction_timer = 0;
@@ -357,6 +445,7 @@ namespace fe
                     }
                 } else {
                     if(player_pos.y() - 8 == _pos.y()){
+                        //wut is this... come on Jono
                         if(player_pos.x() < _pos.x() && bn::abs(player_pos.x() - _pos.x()) > 8 && !_sprite.value().horizontal_flip()){
                             _dx = 0;
                             _dir = -_dir;
@@ -368,6 +457,7 @@ namespace fe
                             _direction_timer = 0;
                             _sprite.value().set_horizontal_flip(!_sprite.value().horizontal_flip());
                         }
+                        //boss teleport
                         if(bn::abs(player_pos.x() - _pos.x()) < 100 && bn::abs(player_pos.x() - _pos.x()) > 16 && boss_tele_timer > 60){
                             // bn::fixed diff = player_pos.x() - _pos.x();
                             if(_fall_check(player_pos.x(), _pos.y()) && _hp>0 && !_target_locked){
@@ -397,9 +487,34 @@ namespace fe
                             
                         }
                     } 
+
+                    if(_type ==ENEMY_TYPE::MUTANT){
+                        ++jump_timer;
+                        if(jump_timer > time_to_jump){
+                            if(!is_tired){
+                                time_to_jump = random.get() % 32 * 8 + 100;
+                                _dy = -6;
+                                _grounded = false;
+                            } 
+                            jump_timer = 0;
+                            
+                        }
+                        ++sleep_timer;
+                        if(is_tired && sleep_timer > 180){
+                            is_tired = false;
+                            sleep_timer = 0;
+                        } else if(!is_tired && sleep_timer > time_to_sleep){
+                            is_tired = true;
+                            sleep_timer = 0;
+                        }
+                    }
                     
-                    if(!_invulnerable && _grounded){
+                    if(!_invulnerable && _grounded && _type != ENEMY_TYPE::MUTANT){
                         _dx += _dir*acc;
+                    }
+
+                    if(_type == ENEMY_TYPE::MUTANT && !is_tired){
+                        _dx += _dir*acc*5;
                     }
                 }
                 
@@ -438,7 +553,16 @@ namespace fe
                     } else {
                         _grounded = false;
                     }
-                } else{
+                } else if(_type == ENEMY_TYPE::MUTANT){
+                    if(_check_collisions_map(_pos, Hitbox(0,32,32,0), directions::down, _map, _level, _map_cells)){
+                        _dy = 0;
+                        // BN_LOG(bn::to_string<32>(_pos.x())+" " + bn::to_string<32>(_pos.y()));
+                        _pos.set_y(_pos.y() - modulo(_pos.y(),8));
+                        _grounded = true;
+                    } else {
+                        _grounded = false;
+                    }
+                } else {
                     if(_check_collisions_map(_pos, Hitbox(0,8,8,0), directions::down, _map, _level, _map_cells)){
                         _dy = 0;
                         // BN_LOG(bn::to_string<32>(_pos.x())+" " + bn::to_string<32>(_pos.y()));
@@ -459,6 +583,31 @@ namespace fe
                 }
             }
 
+            //ANIMATION 
+            if(_type == ENEMY_TYPE::MUTANT){
+                if(is_tired){
+                    if(_mutant_action.value().graphics_indexes().front() == 17 && _mutant_action.value().done()){
+                        is_tired = false;
+                    } else if(_mutant_action.value().graphics_indexes().front() != 15 && _mutant_action.value().graphics_indexes().front() != 17){
+                        _mutant_action = bn::create_sprite_animate_action_forever(
+                                    _sprite.value(), 10, bn::sprite_items::mutant.tiles_item(), 15,16,15,16,15,16,15,16,15,16);
+                    }
+                } else {
+                    if(!_grounded){
+                        if(_dy <0){
+                            _mutant_action = bn::create_sprite_animate_action_forever(
+                                    _sprite.value(), 2, bn::sprite_items::mutant.tiles_item(), 13,13,13,13,13,13,13,13,13,13);
+                        } else {
+                            _mutant_action = bn::create_sprite_animate_action_forever(
+                                    _sprite.value(), 2, bn::sprite_items::mutant.tiles_item(), 14,14,14,14,14,14,14,14,14,14);
+                        }
+                    } else if(_mutant_action.value().graphics_indexes().front() != 3){
+                        _mutant_action = bn::create_sprite_animate_action_forever(
+                                _sprite.value(), 2, bn::sprite_items::mutant.tiles_item(), 3,4,5,6,7,8,9,10,11,12);
+                    }
+                }
+            }
+
             //max
             if(_dy > max_dy){
                 _dy = max_dy;
@@ -475,9 +624,13 @@ namespace fe
                 }
             }
             
-            if(!_action.value().done()){
+            if(_action.has_value() && !_action.value().done()){
                 _action.value().update();
             }     
+
+            if(_mutant_action.has_value() && !_mutant_action.value().done()){
+                _mutant_action.value().update();
+            }  
 
             if(_direction_timer < 121){
                _direction_timer+=1;

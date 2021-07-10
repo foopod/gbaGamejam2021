@@ -9,7 +9,9 @@ namespace fe
         SLIME,
         SLIMEO,
         WALL,
-        BOSS
+        BOSS,
+        RAT,
+        MUTANT
     };
 }
 

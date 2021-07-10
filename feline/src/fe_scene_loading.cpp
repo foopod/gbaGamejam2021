@@ -19,8 +19,9 @@
 //assets
 #include "bn_sprite_items_cat_sprite.h"
 #include "bn_sprite_items_cat_sprite_other.h"
-#include "bn_affine_bg_items_loading_bg.h"
-#include "bn_affine_bg_items_loading_bg_other.h"
+#include "bn_regular_bg_items_loading_bg.h"
+#include "bn_regular_bg_items_lab_bg.h"
+#include "bn_regular_bg_items_loading_bg_other.h"
 
 #include "bn_music_items.h"
 #include "bn_music_actions.h"
@@ -55,7 +56,7 @@ namespace fe
         bn::camera_ptr camera = bn::camera_ptr::create(init_pos.x()+100, init_pos.y());
 
         // map
-        bn::affine_bg_ptr map = bn::affine_bg_items::loading_bg.create_bg(512, 512);
+        bn::regular_bg_ptr map = bn::regular_bg_items::loading_bg.create_bg(512, 512);
         // map.set_horizontal_scale(2);
 
         if(next_scene == Scene::OTHER){
@@ -76,7 +77,11 @@ namespace fe
             action5 = bn::create_sprite_animate_action_forever(
                         cat_sprite5, 4, bn::sprite_items::cat_sprite_other.tiles_item(), 7, 6,5,4, 3, 2, 11, 10, 9,8);
 
-            map = bn::affine_bg_items::loading_bg_other.create_bg(512, 512);
+            map = bn::regular_bg_items::loading_bg_other.create_bg(512, 512);
+        } else if(next_scene == Scene::LAB){
+            map = bn::regular_bg_items::lab_bg.create_bg(100 , 0);
+        } else if(next_scene == Scene::LAB_AFTER){
+            return;
         }
 
 
