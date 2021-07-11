@@ -59,6 +59,7 @@ namespace fe
             Enemy(int x, int y, bn::camera_ptr camera, bn::affine_bg_ptr map, ENEMY_TYPE type, int hp);
             void update(bn::fixed_point player_pos);
             bn::fixed_point pos();
+            void set_pos(bn::fixed_point pos);
             bool is_hit(Hitbox attack);
             bool is_vulnerable();
             void set_visible(bool visibility);

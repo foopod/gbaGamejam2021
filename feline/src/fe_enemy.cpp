@@ -141,7 +141,8 @@ namespace fe
         else if (_type == ENEMY_TYPE::MUTANT){
             _sprite = bn::sprite_items::mutant.create_sprite(_pos.x(), _pos.y());
             _sprite.value().set_camera(_camera);
-            _sprite.value().set_bg_priority(1);
+            _sprite.value().set_bg_priority(0);
+            _sprite.value().put_above();
             _mutant_action = bn::create_sprite_animate_action_forever(
                              _sprite.value(), 2, bn::sprite_items::mutant.tiles_item(), 3,4,5,6,7,8,9,10,11,12);
         }
@@ -239,6 +240,7 @@ namespace fe
             if(_type == ENEMY_TYPE::MUTANT){
                 _mutant_action = bn::create_sprite_animate_action_once(
                         _sprite.value(), 4, bn::sprite_items::mutant.tiles_item(), 17,17,17,17,17,17,17,17,17,17);
+                bn::sound_items::mutant_hit.play(1);
             }
             if(_hp <= 0){
                 bn::sound_items::death.play();
@@ -360,6 +362,13 @@ namespace fe
         return _hp;
     }
 
+    void Enemy::set_pos(bn::fixed_point pos){
+        if(_type == ENEMY_TYPE::MUTANT){
+            bn::sound_items::growl.play();
+        }
+        _pos = pos;
+    }
+
     bool Enemy::spotted_player(){
         return _spotted_player;
     }
@@ -397,17 +406,19 @@ namespace fe
             }
 
             // Labrat spot player
-            if(_type == ENEMY_TYPE::RAT){
+            if(_type == ENEMY_TYPE::RAT && !_spotted_player){
                 //left
                 if(_sprite.value().horizontal_flip()){
                     if(check_collisions_bb(Hitbox(_pos.x() -40, _pos.y(), 80, 8), player_pos.x(), player_pos.y(), 16,8)){
                         _spotted_player = true;
+                        bn::sound_items::eek.play(1);
                     }
                 } 
                 else //right
                 {
                     if(check_collisions_bb(Hitbox(_pos.x() +40, _pos.y(), 80, 8), player_pos.x(), player_pos.y(), 16,8)){
                         _spotted_player = true;
+                        bn::sound_items::eek.play(1);
                     }
                 }
                 
@@ -588,6 +599,8 @@ namespace fe
                 if(is_tired){
                     if(_mutant_action.value().graphics_indexes().front() == 17 && _mutant_action.value().done()){
                         is_tired = false;
+                        bn::sound_items::growl.play(1);
+                        
                     } else if(_mutant_action.value().graphics_indexes().front() != 15 && _mutant_action.value().graphics_indexes().front() != 17){
                         _mutant_action = bn::create_sprite_animate_action_forever(
                                     _sprite.value(), 10, bn::sprite_items::mutant.tiles_item(), 15,16,15,16,15,16,15,16,15,16);
@@ -604,6 +617,8 @@ namespace fe
                     } else if(_mutant_action.value().graphics_indexes().front() != 3){
                         _mutant_action = bn::create_sprite_animate_action_forever(
                                 _sprite.value(), 2, bn::sprite_items::mutant.tiles_item(), 3,4,5,6,7,8,9,10,11,12);
+                    } else if(_mutant_action.value().current_index() == 3){
+                        bn::sound_items::steps.play(1);
                     }
                 }
             }

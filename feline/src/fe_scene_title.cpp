@@ -93,7 +93,7 @@ namespace fe
 
         int timer = 0;
 
-        while(!(bn::keypad::any_pressed() && timer > 120))
+        while(!(bn::keypad::any_pressed() && timer > 60))
         {
             // cat_sprite.set_x(cat_sprite.x() + 1.3);
 

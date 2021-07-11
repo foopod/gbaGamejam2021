@@ -54,8 +54,8 @@ namespace fe
 
         // spawn_location = bn::fixed_point(447, 661);
         bn::sprite_text_generator text_generator(variable_8x8_sprite_font);
-        bn::music_items::sanctuary.play();
-        bn::music::set_volume(0.8);
+        bn::music_items::wiskedaway.play();
+        bn::music::set_volume(0.1);
 
         // map
         bn::affine_bg_ptr map = bn::affine_bg_items::lab.create_bg(512, 512);
@@ -96,7 +96,7 @@ namespace fe
         enemies.push_back(Enemy(885, 528, camera, map, ENEMY_TYPE::RAT, 5));
         enemies.push_back(Enemy(932, 608, camera, map, ENEMY_TYPE::RAT, 5));
         enemies.push_back(Enemy(874, 768, camera, map, ENEMY_TYPE::RAT, 5));
-        enemies.push_back(Enemy(581, 683, camera, map, ENEMY_TYPE::MUTANT, 5));
+        enemies.push_back(Enemy(-1000, -1000, camera, map, ENEMY_TYPE::MUTANT, 5));
 
         Enemy& mutant = enemies[7];
         // enemies.push_back(Enemy(673, 384, camera, map, ENEMY_TYPE::BOSS, 5));
@@ -108,6 +108,7 @@ namespace fe
         NPC computerstuff = NPC(bn::fixed_point(326, 296), camera, NPC_TYPE::COMPUTER_STUFF, text_generator);
         NPC potion = NPC(bn::fixed_point(481, 494), camera, NPC_TYPE::POTION, text_generator);
         NPC pewpew = NPC(bn::fixed_point(859, 437), camera, NPC_TYPE::PEWPEW, text_generator);
+        NPC mutant_npc = NPC(bn::fixed_point(581, 683), camera, NPC_TYPE::MUTANT, text_generator);
         Tooltip explain_sneak = Tooltip(bn::fixed_point(143, 400),"Don't let the lab rats see you.", text_generator);
 
         // _player
@@ -203,6 +204,14 @@ namespace fe
                 }else if(!pewpew.is_talking()){
                     _player->set_listening(false);
                 }
+            }  else if(mutant_npc.check_trigger(_player->pos()))
+            {
+                if(bn::keypad::up_pressed()){
+                    _player->set_listening(true);
+                    mutant_npc.talk();
+                }else if(!mutant_npc.is_talking()){
+                    _player->set_listening(false);
+                }
             } 
             else if(explain_sneak.check_trigger(_player->pos())){
                 _player->set_listening(true);
@@ -217,6 +226,17 @@ namespace fe
             computerstuff.update();
             potion.update();
             pewpew.update();
+            
+
+            if(mutant_npc.finished_talking()){
+                _player->set_listening(false);
+                if(!mutant_npc.hidden()){
+                    mutant_npc.set_is_hidden(true);
+                    mutant.set_pos(bn::fixed_point(581, 683));
+                }
+            }else {
+                mutant_npc.update();
+            }
 
             if(transparency_action.has_value() && !transparency_action.value().done()){
                 transparency_action.value().update();

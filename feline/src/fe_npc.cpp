@@ -15,6 +15,7 @@
 #include "bn_sprite_items_pot_frog.h"
 #include "bn_sprite_items_cage.h"
 #include "bn_sprite_items_fam.h"
+#include "bn_sprite_items_mutant.h"
 #include "variable_8x8_sprite_font.h"
 #include "bn_sprite_items_stone_plaque.h"
 
@@ -85,6 +86,13 @@ namespace fe
             _action = bn::create_sprite_animate_action_forever(
                             _sprite.value(), 20, bn::sprite_items::fam.tiles_item(), 0,1);
             _lines = bn::span(_fam_lines);
+        }
+        else if(_type == NPC_TYPE::MUTANT){
+            _sprite = bn::sprite_items::mutant.create_sprite(_pos.x(), _pos.y()-4);
+            _sprite.value().set_horizontal_flip(true);
+            _action = bn::create_sprite_animate_action_forever(
+                            _sprite.value(), 20, bn::sprite_items::mutant.tiles_item(), 0,0);
+            _lines = bn::span(_mutant_lines);
         }
         else if(_type == NPC_TYPE::GIRLS){
             _lines = bn::span(_girls_lines);
@@ -165,7 +173,7 @@ namespace fe
     }
 
     bool NPC::check_trigger(bn::fixed_point pos){
-        if(!_finished){
+        if(!_finished && !_hidden){
             if(bn::abs(_pos.x() - pos.x()) < 50){
                 if(bn::abs(_pos.y() - pos.y()) < 50){
                     _is_near_player = true;
@@ -184,5 +192,16 @@ namespace fe
 
     bool NPC::is_talking(){
         return _is_talking;
+    }
+
+    void NPC::set_is_hidden(bool is_hidden){
+        _hidden = is_hidden;
+        if(_sprite.has_value()){
+            _sprite.value().set_visible(!is_hidden);
+        }
+    }
+
+    bool NPC::hidden(){
+        return _hidden;
     }
 }

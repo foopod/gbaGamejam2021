@@ -466,7 +466,7 @@ namespace fe
         if(bn::keypad::l_pressed() && !_listening)
         {
             if(_can_teleport && _healthbar.is_glow_ready()){
-                BN_LOG(_tele_sprite.position().x());
+                // BN_LOG(_tele_sprite.position().x());
                 _tele_sprite.set_position(_pos);
                 _tele_sprite.set_visible(true);
                 _tele_sprite.set_horizontal_flip(!is_right());

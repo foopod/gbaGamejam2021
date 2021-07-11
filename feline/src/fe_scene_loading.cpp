@@ -26,13 +26,19 @@
 #include "bn_music_items.h"
 #include "bn_music_actions.h"
 
+#include "bn_music_items.h"
+
 namespace fe
 {
     void Loading::execute(Scene next_scene)
     {
         bn::fixed_point init_pos = bn::fixed_point(0, 0);
 
-        bn::music::set_volume(0.3);
+        if(next_scene == Scene::OTHER){
+            bn::music_items::crystal.play();
+        } else {
+            bn::music::set_volume(0.3);
+        }
         
         // player sprite
         bn::sprite_ptr cat_sprite1 = bn::sprite_items::cat_sprite.create_sprite(init_pos.x(), init_pos.y()-50);
@@ -93,7 +99,7 @@ namespace fe
         cat_sprite5.set_camera(camera);
         map.set_camera(camera);
 
-        for(int i = 0; i < 120; ++i)
+        for(int i = 0; i < 160; ++i)
         {
             if(next_scene != Scene::OTHER){
                 cat_sprite1.set_x(cat_sprite1.x() + 1.3);

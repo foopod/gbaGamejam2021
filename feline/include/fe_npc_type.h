@@ -19,7 +19,8 @@ namespace fe
         POTION,
         COMPUTER_STUFF,
         PEWPEW,
-        FAM
+        FAM,
+        MUTANT
     };
 }
 

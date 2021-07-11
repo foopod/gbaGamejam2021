@@ -31,6 +31,8 @@ namespace fe
             bool _finished = false;
             bool _has_spoken_once = false;
 
+            bool _hidden = false;
+
             bn::vector<bn::sprite_ptr, 32> _text_sprites;
             bn::sprite_text_generator& _text_generator;
 
@@ -176,6 +178,15 @@ namespace fe
                 "pew"
             };
 
+            bn::string_view _mutant_lines[6] = {
+                "Eileen...",
+                "Is that you?",
+                "Kids?",
+                "...",
+                "...",
+                "..."
+            };
+
             bn::string_view _fam_lines[7] = {
                 "Eileen!",
                 "Thank goodness you are okay",
@@ -194,7 +205,8 @@ namespace fe
             bool is_talking();
             void talk();
             bool finished_talking();
-            
+            void set_is_hidden(bool is_hidden);
+            bool hidden();
     };
 }
 
