@@ -11,6 +11,7 @@
 #include "bn_fixed_point.h"
 #include "bn_sprite_ptr.h"
 #include "bn_camera_ptr.h"
+#include "bn_bg_palette_ptr.h"
 #include "bn_regular_bg_ptr.h"
 #include "bn_affine_bg_ptr.h"
 #include "bn_sprite_animate_actions.h"
@@ -24,6 +25,8 @@
 //assets
 #include "bn_sprite_items_rip.h"
 #include "bn_affine_bg_items_gbajam_splash.h"
+#include "bn_regular_bg_items_splash.h"
+#include "bn_regular_bg_items_loading_bg.h"
 
 #include "bn_music_items.h"
 
@@ -33,41 +36,19 @@
 namespace fe
 {
 
-    Scene GBA::execute()
+Scene GBA::execute()
+{
+
+    bn::regular_bg_ptr map = bn::regular_bg_items::splash.create_bg(0 , 0);
+    int timer = 0;
+    while(true)
     {
-
-        bn::affine_bg_ptr map = bn::affine_bg_items::gbajam_splash.create_bg(0 , 0);
-        // map.value().set_scale(2);
-        
-        bn::sprite_text_generator text_generator(variable_8x8_sprite_font);
-        bn::vector<bn::sprite_ptr, 32> _text_sprites;
-
-        bn::string<32> middle_text("BUTANO ");
-        middle_text.append(bn::to_string<4>(bn::version::major()));
-        middle_text.append('.');
-        middle_text.append(bn::to_string<4>(bn::version::minor()));
-        middle_text.append('.');
-        middle_text.append(bn::to_string<4>(bn::version::patch()));
-
-        for(bn::sprite_ptr& text_sprite : _text_sprites)
-        {
-            text_sprite.set_blending_enabled(true);
+        if(timer > 180){
+            return Scene::BUTANO;
         }
-
-        int timer = 0;
-        // camera
-
-        while(true)
-        {
-            if(timer > 180){
-                // map.reset();
-                return Scene::BUTANO;
-            }
-            
-            ++timer;
-            bn::core::update();
-        }
-
         
-    }
+        ++timer;
+        bn::core::update();
+    }   
+}
 }

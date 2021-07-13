@@ -83,15 +83,15 @@ int main()
             fe::Title title = fe::Title();
             scene = title.execute();
         }
-        else if(scene == fe::Scene::GBA)
-        {
-            fe::GBA gba = fe::GBA();
-            scene = gba.execute();
-        }
         else if(scene == fe::Scene::BUTANO)
         {
             fe::Butano butano = fe::Butano();
             scene = butano.execute();
+        }
+        else if(scene == fe::Scene::GBA)
+        {
+            fe::GBA gba = fe::GBA();
+            scene = gba.execute();
         }
         else if(scene == fe::Scene::END)
         {
@@ -124,6 +124,7 @@ int main()
             fe::LabAfter lab_after = fe::LabAfter(player);
             scene = lab_after.execute(bn::fixed_point(502, 704));
         }
+        player.delete_data();
         player.hide();
         if(scene != fe::Scene::DEATH && scene != fe::Scene::BUTANO && scene != fe::Scene::TITLE){
             fe::Loading loading = fe::Loading();

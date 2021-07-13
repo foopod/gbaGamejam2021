@@ -124,7 +124,7 @@ namespace fe
 
         if(_is_talking){
             if(_currentChar == _lines.at(_currentLine).size() * 2){
-                if(bn::keypad::up_pressed() || bn::keypad::a_pressed())
+                if(bn::keypad::up_pressed() || bn::keypad::a_pressed() || bn::keypad::a_held() || bn::keypad::up_held())
                 {
                     if(_currentLine == _lines.size()-1)
                     {
@@ -154,7 +154,12 @@ namespace fe
                     _has_spoken_once = true;
                 }
                 _currentChars = _lines.at(_currentLine).substr(0,(_currentChar/2)+1);
-                ++_currentChar;
+                if(bn::keypad::a_held() || bn::keypad::up_held()){
+                    _currentChar+=2;
+                } else {
+                    ++_currentChar;
+                }
+                
             }
             _text_generator.set_left_alignment();
             _text_sprites.clear();

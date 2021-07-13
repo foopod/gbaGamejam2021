@@ -13,7 +13,7 @@
 #include "bn_regular_bg_ptr.h"
 #include "bn_affine_bg_ptr.h"
 #include "bn_sprite_animate_actions.h"
-#include "bn_affine_bg_pivot_position_hbe_ptr.h"
+#include "bn_regular_bg_position_hbe_ptr.h"
 #include "bn_affine_bg_attributes_hbe_ptr.h"
 
 //fe code
@@ -27,7 +27,7 @@
 #include "bn_sprite_items_title_start_3.h"
 #include "bn_sprite_items_title_1.h"
 #include "bn_sprite_items_title_2.h"
-#include "bn_affine_bg_items_title.h"
+#include "bn_regular_bg_items_title.h"
 
 #include "bn_music_items.h"
 
@@ -45,7 +45,7 @@ namespace fe
     Scene Title::execute()
     {
         // map
-        bn::affine_bg_ptr map = bn::affine_bg_items::title.create_bg(0, 0);
+        bn::regular_bg_ptr map = bn::regular_bg_items::title.create_bg(0, 0);
 
         bn::fixed_point init_pos = bn::fixed_point(-70, 44);
         bn::music_items::mystic.play();
@@ -75,8 +75,8 @@ namespace fe
         
 
         bn::array<bn::fixed, bn::display::height()> horizontal_deltas;
-        bn::affine_bg_pivot_position_hbe_ptr horizontal_hbe =
-                bn::affine_bg_pivot_position_hbe_ptr::create_horizontal(map, horizontal_deltas);
+        bn::regular_bg_position_hbe_ptr horizontal_hbe =
+                bn::regular_bg_position_hbe_ptr::create_horizontal(map, horizontal_deltas);
 
         // camera
         platform.set_camera(camera);
